@@ -135,6 +135,18 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             console.log(`🔧 Fresh data'dan alındı: ${column?.name} = ${value}`);
           }
           
+          // ÖNEMLİ: Eğer bu hücrede bir formül varsa, calculated değerini kullan
+          const currentRowId = tableRow.id;
+          const currentColumnName = column?.name || '';
+          const formulaInThisCell = (cellFormulas || []).find((f: any) => 
+            f.rowId === currentRowId && f.columnName === currentColumnName
+          );
+          
+          if (formulaInThisCell && formulaInThisCell.calculatedValue !== null && formulaInThisCell.calculatedValue !== undefined) {
+            value = formulaInThisCell.calculatedValue;
+            console.log(`🧮 Formül hücresi için calculated değer kullanıldı: ${currentColumnName}[${currentRowId}] = ${value} (formül: ${formulaInThisCell.formula})`);
+          }
+          
           let finalValue: string | number | null = null;
           
           if (value === null || value === undefined || value === '') {
@@ -352,20 +364,33 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     const currentRowIds = (tableData || []).map((row: any) => row.id);
     console.log(`🔍 Mevcut tablo satır ID'leri:`, currentRowIds);
 
-    // Değişen field (örn: a1, b2) bağımlılığında olan formülleri filtrele
+    // ✨ DÜZELTME: changedField'ı Excel tarzı hücre referansına çevir
+    const columnIndex = columns.findIndex((col: any) => col.name === changedField);
+    const columnLetter = columnIndex >= 0 ? String.fromCharCode(65 + columnIndex) : changedField; // A, B, C...
+    console.log(`🔄 Sütun mapping: "${changedField}" -> "${columnLetter}" (index: ${columnIndex})`);
+
+    // Değişen field için tüm olası hücre referansları oluştur (A1, A2, A3... vs B1, B2, B3...)
+    const possibleCellRefs = [];
+    for (let row = 1; row <= Math.max(currentRowIds.length, 10); row++) {
+      possibleCellRefs.push(`${columnLetter}${row}`.toLowerCase());
+    }
+    console.log(`📋 Olası hücre referansları: ${possibleCellRefs.join(', ')}`);
+
+    // Değişen field bağımlılığında olan formülleri filtrele
     const dependentFormulas = cellFormulas.filter((formula: any) => {
       const formulaText = formula.formula.toLowerCase();
-      const fieldRef = changedField.toLowerCase();
       
       // 1. Önce formül bu tablodaki satırlardan biri mi kontrol et
       const isInCurrentTable = currentRowIds.includes(formula.rowId);
       
-      // 2. Formülde field referansı var mı kontrol et
-      const hasDependency = formulaText.includes(fieldRef);
+      // 2. Formülde bu sütunun herhangi bir hücre referansı var mı kontrol et
+      const hasDependency = possibleCellRefs.some(cellRef => formulaText.includes(cellRef)) || 
+                           formulaText.includes(changedField.toLowerCase()) ||
+                           formulaText.includes(columnLetter.toLowerCase());
       
       const shouldInclude = isInCurrentTable && hasDependency;
       
-      console.log(`🔍 Formül "${formula.formula}" (rowId: ${formula.rowId}) -> ${fieldRef} bağımlı: ${hasDependency}, mevcut tabloda: ${isInCurrentTable}, dahil: ${shouldInclude}`);
+      console.log(`🔍 Formül "${formula.formula}" (rowId: ${formula.rowId}) -> ${columnLetter} bağımlı: ${hasDependency}, mevcut tabloda: ${isInCurrentTable}, dahil: ${shouldInclude}`);
       return shouldInclude;
     });
 

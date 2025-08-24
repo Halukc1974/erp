@@ -317,6 +317,11 @@ export default function CellLinkModal({
       onClose();
       resetSelections();
       setFormula(""); // Formülü temizle
+      
+      // Sayfayı tamamen yenile (F5 gibi)
+      setTimeout(() => {
+        window.location.reload();
+      }, 500); // 500ms bekle ki toast görünebilsin
     },
     onError: (error: any) => {
       console.log('💥 onError tetiklendi! Error:', error);
