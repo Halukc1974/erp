@@ -92,10 +92,35 @@ export default function CellLinkModal({
   }, [currentTableColumns, sourceColumnName]);
 
   // Seçilen tablonun verilerini getir  
-  const { data: tableData = [], isLoading: dataLoading } = useQuery({
+  const { data: tableData = [], isLoading: dataLoading, error: dataError } = useQuery({
     queryKey: [`/api/table-data/${selectedTable}`],
     enabled: isOpen && !!selectedTable,
   });
+
+  // Debug: Veri yükleme durumunu logla
+  React.useEffect(() => {
+    console.log(`🔍 selectedTable değişti:`, selectedTable);
+    if (selectedTable) {
+      console.log(`🔍 Tablo verisi yükleniyor: "${selectedTable}"`);
+      console.log('  - API endpoint:', `/api/table-data/${selectedTable}`);
+      console.log('  - Yükleniyor:', dataLoading);
+      console.log('  - Hata:', dataError);
+      console.log('  - Veri:', tableData);
+      if (Array.isArray(tableData)) {
+        console.log('  - Veri sayısı:', tableData.length);
+        if (tableData.length > 0) {
+          console.log('  - İlk kayıt örneği:', tableData[0]);
+          console.log('  - İlk kayıt detayı:');
+          console.log('    * id:', tableData[0]?.id);
+          console.log('    * keys:', Object.keys(tableData[0] || {}));
+          console.log('    * rowData:', tableData[0]?.rowData);
+          if (tableData[0]?.rowData) {
+            console.log('    * rowData keys:', Object.keys(tableData[0].rowData));
+          }
+        }
+      }
+    }
+  }, [selectedTable, tableData, dataLoading, dataError]);
 
   // Seçilen tablonun kolonlarını bul
   const selectedTableInfo = React.useMemo(() => {
@@ -104,6 +129,16 @@ export default function CellLinkModal({
     }
     return null;
   }, [availableTables, selectedTable]);
+
+  // Debug: selectedTableInfo logla
+  React.useEffect(() => {
+    if (selectedTable) {
+      console.log('  - selectedTableInfo:', selectedTableInfo);
+      if (selectedTableInfo) {
+        console.log('  - selectedTableInfo.columns:', selectedTableInfo.columns);
+      }
+    }
+  }, [selectedTable, selectedTableInfo]);
 
   // Cell link oluşturma mutation
   const createLinkMutation = useMutation({
@@ -526,6 +561,18 @@ export default function CellLinkModal({
           // A1, B1, C1... formatında log - DOĞRU MAPPING
           const cellRef = String.fromCharCode(65 + col) + (row + 1);
           console.log(`📍 ${cellRef} = ${finalValue} (raw: ${value}) [sütun: ${column.name}]`);
+          
+          // a1+b1+c1 formülü için özel debug
+          if (formula.toLowerCase().includes('a1+b1+c1') && row === 0) {
+            console.log(`🔥 MODAL FORMÜL DEBUG [${cellRef}]:`, {
+              columnName: column.name,
+              rawValue: value,
+              processedValue: finalValue,
+              expectedForA1: col === 0 ? 'Bu A1 olmalı' : 'Bu A1 değil',
+              expectedForB1: col === 1 ? 'Bu B1 olmalı' : 'Bu B1 değil', 
+              expectedForC1: col === 2 ? 'Bu C1 olmalı' : 'Bu C1 değil'
+            });
+          }
         }
         dataMatrix.push(rowData);
       }
@@ -560,7 +607,17 @@ export default function CellLinkModal({
       
       // Sonucu al
       const result = hf.getCellValue({ sheet: numericSheetId, row: tempRow, col: tempCol });
-      console.log('✅ Sonuç:', result, 'Type:', typeof result);
+      console.log('✅ MODAL FORMÜL SONUCU:', {
+        formula: formula,
+        result: result,
+        resultType: typeof result,
+        expectedFormula: 'A1+B1+C1 değerleri toplamı olmalı',
+        matrixFirst3Cells: [
+          `A1=${dataMatrix[0]?.[0]}`, 
+          `B1=${dataMatrix[0]?.[1]}`, 
+          `C1=${dataMatrix[0]?.[2]}`
+        ]
+      });
       
       // HyperFormula instance'ını temizle
       hf.destroy();
