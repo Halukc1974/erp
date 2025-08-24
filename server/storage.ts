@@ -152,12 +152,13 @@ export interface IStorage {
   updateDynamicTable(id: string, table: Partial<InsertDynamicTable>): Promise<DynamicTable>;
   deleteDynamicTable(id: string): Promise<void>;
   
-  getDynamicTableColumns(tableId: string): Promise<DynamicColumn[]>;
-  createDynamicTableColumn(column: InsertDynamicColumn): Promise<DynamicColumn>;
-  updateDynamicTableColumn(id: string, column: Partial<InsertDynamicColumn>): Promise<DynamicColumn>;
-  deleteDynamicTableColumn(id: string): Promise<void>;
+  getDynamicColumns(tableId: string): Promise<DynamicColumn[]>;
+  createDynamicColumn(column: InsertDynamicColumn): Promise<DynamicColumn>;
+  updateDynamicColumn(id: string, column: Partial<InsertDynamicColumn>): Promise<DynamicColumn>;
+  deleteDynamicColumn(id: string): Promise<void>;
   
   getDynamicTableData(tableId: string): Promise<DynamicTableData[]>;
+  getDynamicTableDataRow(id: string): Promise<DynamicTableData | null>;
   createDynamicTableRow(data: InsertDynamicTableData): Promise<DynamicTableData>;
   updateDynamicTableRow(id: string, data: Partial<InsertDynamicTableData>): Promise<DynamicTableData>;
   deleteDynamicTableRow(id: string): Promise<void>;
@@ -553,6 +554,11 @@ export class DatabaseStorage implements IStorage {
 
   async getDynamicTableData(tableId: string): Promise<DynamicTableData[]> {
     return await db.select().from(dynamicTableData).where(eq(dynamicTableData.tableId, tableId)).orderBy(dynamicTableData.createdAt);
+  }
+
+  async getDynamicTableDataRow(id: string): Promise<DynamicTableData | null> {
+    const [row] = await db.select().from(dynamicTableData).where(eq(dynamicTableData.id, id)).limit(1);
+    return row || null;
   }
 
   async createDynamicTableRow(data: InsertDynamicTableData): Promise<DynamicTableData> {

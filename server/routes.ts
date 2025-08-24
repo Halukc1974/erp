@@ -530,7 +530,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(row);
     } catch (error) {
       console.error("❌ Error creating dynamic table row:", error);
-      res.status(400).json({ message: "Failed to create dynamic table row", error: error.message });
+      res.status(400).json({ 
+        message: "Failed to create dynamic table row", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 
@@ -558,7 +561,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(row);
     } catch (error) {
       console.error("❌ Error updating dynamic table row:", error);
-      res.status(400).json({ message: "Failed to update dynamic table row", error: error.message });
+      res.status(400).json({ 
+        message: "Failed to update dynamic table row", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 
