@@ -1,0 +1,217 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+dynamic-tabulator.tsx:683 Cell link clicked: {rowId: '4b68d368-d4fe-40a9-b8af-014cbffab60c', columnName: 'a3'}
+@radix-ui_react-dialog.js?v=f412f044:336 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ @radix-ui_react-dialog.js?v=f412f044:336
+commitHookEffectListMount @ chunk-TWY2MSBH.js?v=f412f044:16915
+commitPassiveMountOnFiber @ chunk-TWY2MSBH.js?v=f412f044:18156
+commitPassiveMountEffects_complete @ chunk-TWY2MSBH.js?v=f412f044:18129
+commitPassiveMountEffects_begin @ chunk-TWY2MSBH.js?v=f412f044:18119
+commitPassiveMountEffects @ chunk-TWY2MSBH.js?v=f412f044:18109
+flushPassiveEffectsImpl @ chunk-TWY2MSBH.js?v=f412f044:19490
+flushPassiveEffects @ chunk-TWY2MSBH.js?v=f412f044:19447
+commitRootImpl @ chunk-TWY2MSBH.js?v=f412f044:19416
+commitRoot @ chunk-TWY2MSBH.js?v=f412f044:19277
+performSyncWorkOnRoot @ chunk-TWY2MSBH.js?v=f412f044:18895
+flushSyncCallbacks @ chunk-TWY2MSBH.js?v=f412f044:9119
+(anonymous) @ chunk-TWY2MSBH.js?v=f412f044:18627
+cell-link-modal.tsx:371 🧮 Formül hesaplanıyor: =A
+cell-link-modal.tsx:372 📊 Tablo verileri: 1 satır
+cell-link-modal.tsx:373 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:391 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:433 📍 A1 = 3 (raw: 3)
+cell-link-modal.tsx:433 📍 B1 = 5 (raw: 5)
+cell-link-modal.tsx:433 📍 C1 = null (raw: )
+cell-link-modal.tsx:433 📍 D1 = null (raw: )
+cell-link-modal.tsx:441 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:493 💥 HyperFormula hesaplama hatası: ExpectedValueOfTypeError: Expected value of type: number for config parameter: sheetId
+    at validateArgToType (hyperformula.js?v=f412f044:15930:11)
+    at _HyperFormula.setSheetContent (hyperformula.js?v=f412f044:24472:5)
+    at calculateFormulaPreview (cell-link-modal.tsx:444:10)
+    at cell-link-modal.tsx:505:25
+    at commitHookEffectListMount (chunk-TWY2MSBH.js?v=f412f044:16915:34)
+    at commitPassiveMountOnFiber (chunk-TWY2MSBH.js?v=f412f044:18156:19)
+    at commitPassiveMountEffects_complete (chunk-TWY2MSBH.js?v=f412f044:18129:17)
+    at commitPassiveMountEffects_begin (chunk-TWY2MSBH.js?v=f412f044:18119:15)
+    at commitPassiveMountEffects (chunk-TWY2MSBH.js?v=f412f044:18109:11)
+    at flushPassiveEffectsImpl (chunk-TWY2MSBH.js?v=f412f044:19490:11)
+calculateFormulaPreview @ cell-link-modal.tsx:493
+(anonymous) @ cell-link-modal.tsx:505
+commitHookEffectListMount @ chunk-TWY2MSBH.js?v=f412f044:16915
+commitPassiveMountOnFiber @ chunk-TWY2MSBH.js?v=f412f044:18156
+commitPassiveMountEffects_complete @ chunk-TWY2MSBH.js?v=f412f044:18129
+commitPassiveMountEffects_begin @ chunk-TWY2MSBH.js?v=f412f044:18119
+commitPassiveMountEffects @ chunk-TWY2MSBH.js?v=f412f044:18109
+flushPassiveEffectsImpl @ chunk-TWY2MSBH.js?v=f412f044:19490
+flushPassiveEffects @ chunk-TWY2MSBH.js?v=f412f044:19447
+commitRootImpl @ chunk-TWY2MSBH.js?v=f412f044:19416
+commitRoot @ chunk-TWY2MSBH.js?v=f412f044:19277
+performSyncWorkOnRoot @ chunk-TWY2MSBH.js?v=f412f044:18895
+flushSyncCallbacks @ chunk-TWY2MSBH.js?v=f412f044:9119
+flushSync @ chunk-TWY2MSBH.js?v=f412f044:18959
+finishEventHandler @ chunk-TWY2MSBH.js?v=f412f044:3569
+batchedUpdates @ chunk-TWY2MSBH.js?v=f412f044:3582
+dispatchEventForPluginEventSystem @ chunk-TWY2MSBH.js?v=f412f044:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-TWY2MSBH.js?v=f412f044:5478
+dispatchEvent @ chunk-TWY2MSBH.js?v=f412f044:5472
+dispatchDiscreteEvent @ chunk-TWY2MSBH.js?v=f412f044:5449
+cell-link-modal.tsx:371 🧮 Formül hesaplanıyor: =A1
+cell-link-modal.tsx:372 📊 Tablo verileri: 1 satır
+cell-link-modal.tsx:373 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:391 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:433 📍 A1 = 3 (raw: 3)
+cell-link-modal.tsx:433 📍 B1 = 5 (raw: 5)
+cell-link-modal.tsx:433 📍 C1 = null (raw: )
+cell-link-modal.tsx:433 📍 D1 = null (raw: )
+cell-link-modal.tsx:441 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:493 💥 HyperFormula hesaplama hatası: ExpectedValueOfTypeError: Expected value of type: number for config parameter: sheetId
+    at validateArgToType (hyperformula.js?v=f412f044:15930:11)
+    at _HyperFormula.setSheetContent (hyperformula.js?v=f412f044:24472:5)
+    at calculateFormulaPreview (cell-link-modal.tsx:444:10)
+    at cell-link-modal.tsx:505:25
+    at commitHookEffectListMount (chunk-TWY2MSBH.js?v=f412f044:16915:34)
+    at commitPassiveMountOnFiber (chunk-TWY2MSBH.js?v=f412f044:18156:19)
+    at commitPassiveMountEffects_complete (chunk-TWY2MSBH.js?v=f412f044:18129:17)
+    at commitPassiveMountEffects_begin (chunk-TWY2MSBH.js?v=f412f044:18119:15)
+    at commitPassiveMountEffects (chunk-TWY2MSBH.js?v=f412f044:18109:11)
+    at flushPassiveEffectsImpl (chunk-TWY2MSBH.js?v=f412f044:19490:11)
+calculateFormulaPreview @ cell-link-modal.tsx:493
+(anonymous) @ cell-link-modal.tsx:505
+commitHookEffectListMount @ chunk-TWY2MSBH.js?v=f412f044:16915
+commitPassiveMountOnFiber @ chunk-TWY2MSBH.js?v=f412f044:18156
+commitPassiveMountEffects_complete @ chunk-TWY2MSBH.js?v=f412f044:18129
+commitPassiveMountEffects_begin @ chunk-TWY2MSBH.js?v=f412f044:18119
+commitPassiveMountEffects @ chunk-TWY2MSBH.js?v=f412f044:18109
+flushPassiveEffectsImpl @ chunk-TWY2MSBH.js?v=f412f044:19490
+flushPassiveEffects @ chunk-TWY2MSBH.js?v=f412f044:19447
+commitRootImpl @ chunk-TWY2MSBH.js?v=f412f044:19416
+commitRoot @ chunk-TWY2MSBH.js?v=f412f044:19277
+performSyncWorkOnRoot @ chunk-TWY2MSBH.js?v=f412f044:18895
+flushSyncCallbacks @ chunk-TWY2MSBH.js?v=f412f044:9119
+flushSync @ chunk-TWY2MSBH.js?v=f412f044:18959
+finishEventHandler @ chunk-TWY2MSBH.js?v=f412f044:3569
+batchedUpdates @ chunk-TWY2MSBH.js?v=f412f044:3582
+dispatchEventForPluginEventSystem @ chunk-TWY2MSBH.js?v=f412f044:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-TWY2MSBH.js?v=f412f044:5478
+dispatchEvent @ chunk-TWY2MSBH.js?v=f412f044:5472
+dispatchDiscreteEvent @ chunk-TWY2MSBH.js?v=f412f044:5449
+cell-link-modal.tsx:371 🧮 Formül hesaplanıyor: =A1+
+cell-link-modal.tsx:372 📊 Tablo verileri: 1 satır
+cell-link-modal.tsx:373 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:391 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:433 📍 A1 = 3 (raw: 3)
+cell-link-modal.tsx:433 📍 B1 = 5 (raw: 5)
+cell-link-modal.tsx:433 📍 C1 = null (raw: )
+cell-link-modal.tsx:433 📍 D1 = null (raw: )
+cell-link-modal.tsx:441 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:493 💥 HyperFormula hesaplama hatası: ExpectedValueOfTypeError: Expected value of type: number for config parameter: sheetId
+    at validateArgToType (hyperformula.js?v=f412f044:15930:11)
+    at _HyperFormula.setSheetContent (hyperformula.js?v=f412f044:24472:5)
+    at calculateFormulaPreview (cell-link-modal.tsx:444:10)
+    at cell-link-modal.tsx:505:25
+    at commitHookEffectListMount (chunk-TWY2MSBH.js?v=f412f044:16915:34)
+    at commitPassiveMountOnFiber (chunk-TWY2MSBH.js?v=f412f044:18156:19)
+    at commitPassiveMountEffects_complete (chunk-TWY2MSBH.js?v=f412f044:18129:17)
+    at commitPassiveMountEffects_begin (chunk-TWY2MSBH.js?v=f412f044:18119:15)
+    at commitPassiveMountEffects (chunk-TWY2MSBH.js?v=f412f044:18109:11)
+    at flushPassiveEffectsImpl (chunk-TWY2MSBH.js?v=f412f044:19490:11)
+calculateFormulaPreview @ cell-link-modal.tsx:493
+(anonymous) @ cell-link-modal.tsx:505
+commitHookEffectListMount @ chunk-TWY2MSBH.js?v=f412f044:16915
+commitPassiveMountOnFiber @ chunk-TWY2MSBH.js?v=f412f044:18156
+commitPassiveMountEffects_complete @ chunk-TWY2MSBH.js?v=f412f044:18129
+commitPassiveMountEffects_begin @ chunk-TWY2MSBH.js?v=f412f044:18119
+commitPassiveMountEffects @ chunk-TWY2MSBH.js?v=f412f044:18109
+flushPassiveEffectsImpl @ chunk-TWY2MSBH.js?v=f412f044:19490
+flushPassiveEffects @ chunk-TWY2MSBH.js?v=f412f044:19447
+commitRootImpl @ chunk-TWY2MSBH.js?v=f412f044:19416
+commitRoot @ chunk-TWY2MSBH.js?v=f412f044:19277
+performSyncWorkOnRoot @ chunk-TWY2MSBH.js?v=f412f044:18895
+flushSyncCallbacks @ chunk-TWY2MSBH.js?v=f412f044:9119
+flushSync @ chunk-TWY2MSBH.js?v=f412f044:18959
+finishEventHandler @ chunk-TWY2MSBH.js?v=f412f044:3569
+batchedUpdates @ chunk-TWY2MSBH.js?v=f412f044:3582
+dispatchEventForPluginEventSystem @ chunk-TWY2MSBH.js?v=f412f044:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-TWY2MSBH.js?v=f412f044:5478
+dispatchEvent @ chunk-TWY2MSBH.js?v=f412f044:5472
+dispatchDiscreteEvent @ chunk-TWY2MSBH.js?v=f412f044:5449
+cell-link-modal.tsx:371 🧮 Formül hesaplanıyor: =A1+A
+cell-link-modal.tsx:372 📊 Tablo verileri: 1 satır
+cell-link-modal.tsx:373 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:391 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:433 📍 A1 = 3 (raw: 3)
+cell-link-modal.tsx:433 📍 B1 = 5 (raw: 5)
+cell-link-modal.tsx:433 📍 C1 = null (raw: )
+cell-link-modal.tsx:433 📍 D1 = null (raw: )
+cell-link-modal.tsx:441 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:493 💥 HyperFormula hesaplama hatası: ExpectedValueOfTypeError: Expected value of type: number for config parameter: sheetId
+    at validateArgToType (hyperformula.js?v=f412f044:15930:11)
+    at _HyperFormula.setSheetContent (hyperformula.js?v=f412f044:24472:5)
+    at calculateFormulaPreview (cell-link-modal.tsx:444:10)
+    at cell-link-modal.tsx:505:25
+    at commitHookEffectListMount (chunk-TWY2MSBH.js?v=f412f044:16915:34)
+    at commitPassiveMountOnFiber (chunk-TWY2MSBH.js?v=f412f044:18156:19)
+    at commitPassiveMountEffects_complete (chunk-TWY2MSBH.js?v=f412f044:18129:17)
+    at commitPassiveMountEffects_begin (chunk-TWY2MSBH.js?v=f412f044:18119:15)
+    at commitPassiveMountEffects (chunk-TWY2MSBH.js?v=f412f044:18109:11)
+    at flushPassiveEffectsImpl (chunk-TWY2MSBH.js?v=f412f044:19490:11)
+calculateFormulaPreview @ cell-link-modal.tsx:493
+(anonymous) @ cell-link-modal.tsx:505
+commitHookEffectListMount @ chunk-TWY2MSBH.js?v=f412f044:16915
+commitPassiveMountOnFiber @ chunk-TWY2MSBH.js?v=f412f044:18156
+commitPassiveMountEffects_complete @ chunk-TWY2MSBH.js?v=f412f044:18129
+commitPassiveMountEffects_begin @ chunk-TWY2MSBH.js?v=f412f044:18119
+commitPassiveMountEffects @ chunk-TWY2MSBH.js?v=f412f044:18109
+flushPassiveEffectsImpl @ chunk-TWY2MSBH.js?v=f412f044:19490
+flushPassiveEffects @ chunk-TWY2MSBH.js?v=f412f044:19447
+commitRootImpl @ chunk-TWY2MSBH.js?v=f412f044:19416
+commitRoot @ chunk-TWY2MSBH.js?v=f412f044:19277
+performSyncWorkOnRoot @ chunk-TWY2MSBH.js?v=f412f044:18895
+flushSyncCallbacks @ chunk-TWY2MSBH.js?v=f412f044:9119
+flushSync @ chunk-TWY2MSBH.js?v=f412f044:18959
+finishEventHandler @ chunk-TWY2MSBH.js?v=f412f044:3569
+batchedUpdates @ chunk-TWY2MSBH.js?v=f412f044:3582
+dispatchEventForPluginEventSystem @ chunk-TWY2MSBH.js?v=f412f044:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-TWY2MSBH.js?v=f412f044:5478
+dispatchEvent @ chunk-TWY2MSBH.js?v=f412f044:5472
+dispatchDiscreteEvent @ chunk-TWY2MSBH.js?v=f412f044:5449
+cell-link-modal.tsx:371 🧮 Formül hesaplanıyor: =A1+A2
+cell-link-modal.tsx:372 📊 Tablo verileri: 1 satır
+cell-link-modal.tsx:373 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:391 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:433 📍 A1 = 3 (raw: 3)
+cell-link-modal.tsx:433 📍 B1 = 5 (raw: 5)
+cell-link-modal.tsx:433 📍 C1 = null (raw: )
+cell-link-modal.tsx:433 📍 D1 = null (raw: )
+cell-link-modal.tsx:441 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:493 💥 HyperFormula hesaplama hatası: ExpectedValueOfTypeError: Expected value of type: number for config parameter: sheetId
+    at validateArgToType (hyperformula.js?v=f412f044:15930:11)
+    at _HyperFormula.setSheetContent (hyperformula.js?v=f412f044:24472:5)
+    at calculateFormulaPreview (cell-link-modal.tsx:444:10)
+    at cell-link-modal.tsx:505:25
+    at commitHookEffectListMount (chunk-TWY2MSBH.js?v=f412f044:16915:34)
+    at commitPassiveMountOnFiber (chunk-TWY2MSBH.js?v=f412f044:18156:19)
+    at commitPassiveMountEffects_complete (chunk-TWY2MSBH.js?v=f412f044:18129:17)
+    at commitPassiveMountEffects_begin (chunk-TWY2MSBH.js?v=f412f044:18119:15)
+    at commitPassiveMountEffects (chunk-TWY2MSBH.js?v=f412f044:18109:11)
+    at flushPassiveEffectsImpl (chunk-TWY2MSBH.js?v=f412f044:19490:11)
+calculateFormulaPreview @ cell-link-modal.tsx:493
+(anonymous) @ cell-link-modal.tsx:505
+commitHookEffectListMount @ chunk-TWY2MSBH.js?v=f412f044:16915
+commitPassiveMountOnFiber @ chunk-TWY2MSBH.js?v=f412f044:18156
+commitPassiveMountEffects_complete @ chunk-TWY2MSBH.js?v=f412f044:18129
+commitPassiveMountEffects_begin @ chunk-TWY2MSBH.js?v=f412f044:18119
+commitPassiveMountEffects @ chunk-TWY2MSBH.js?v=f412f044:18109
+flushPassiveEffectsImpl @ chunk-TWY2MSBH.js?v=f412f044:19490
+flushPassiveEffects @ chunk-TWY2MSBH.js?v=f412f044:19447
+commitRootImpl @ chunk-TWY2MSBH.js?v=f412f044:19416
+commitRoot @ chunk-TWY2MSBH.js?v=f412f044:19277
+performSyncWorkOnRoot @ chunk-TWY2MSBH.js?v=f412f044:18895
+flushSyncCallbacks @ chunk-TWY2MSBH.js?v=f412f044:9119
+flushSync @ chunk-TWY2MSBH.js?v=f412f044:18959
+finishEventHandler @ chunk-TWY2MSBH.js?v=f412f044:3569
+batchedUpdates @ chunk-TWY2MSBH.js?v=f412f044:3582
+dispatchEventForPluginEventSystem @ chunk-TWY2MSBH.js?v=f412f044:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-TWY2MSBH.js?v=f412f044:5478
+dispatchEvent @ chunk-TWY2MSBH.js?v=f412f044:5472
+dispatchDiscreteEvent @ chunk-TWY2MSBH.js?v=f412f044:5449
+queryClient.ts:18  POST https://cb8749ad-1ff1-4da4-8438-7e8305cf8b35-00-26mxacatjuo0s.riker.replit.dev/api/cell-formulas 400 (Bad Request)

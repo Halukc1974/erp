@@ -1,0 +1,137 @@
+Cell edited: Object
+dynamic-tabulator.tsx:728 Cell link clicked: Object
+dialog.tsx:543  Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ dialog.tsx:543
+cell-link-modal.tsx:375 🧮 Formül hesaplanıyor: =a
+cell-link-modal.tsx:376 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:377 📋 Sütunlar: Array(4)
+cell-link-modal.tsx:378 📋 İlk satır verisi: Object
+cell-link-modal.tsx:396 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:442 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:442 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:442 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:442 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:442 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:442 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:460 🏗️ Veri matrisi: Array(10)
+cell-link-modal.tsx:469 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:477 ✅ Sonuç: DetailedCellError Type: object
+cell-link-modal.tsx:491  ❌ HyperFormula hatası: DetailedCellError
+calculateFormulaPreview @ cell-link-modal.tsx:491
+cell-link-modal.tsx:375 🧮 Formül hesaplanıyor: =a1
+cell-link-modal.tsx:376 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:377 📋 Sütunlar: Array(4)
+cell-link-modal.tsx:378 📋 İlk satır verisi: Object
+cell-link-modal.tsx:396 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:442 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:442 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:442 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:442 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:442 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:442 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:460 🏗️ Veri matrisi: Array(10)
+cell-link-modal.tsx:469 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:477 ✅ Sonuç: 3 Type: number
+cell-link-modal.tsx:375 🧮 Formül hesaplanıyor: =a1*
+cell-link-modal.tsx:376 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:377 📋 Sütunlar: Array(4)
+cell-link-modal.tsx:378 📋 İlk satır verisi: Object
+cell-link-modal.tsx:396 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:442 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:442 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:442 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:442 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:442 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:442 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:460 🏗️ Veri matrisi: Array(10)
+cell-link-modal.tsx:469 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:477 ✅ Sonuç: DetailedCellError Type: object
+cell-link-modal.tsx:491  ❌ HyperFormula hatası: DetailedCellError
+calculateFormulaPreview @ cell-link-modal.tsx:491
+cell-link-modal.tsx:375 🧮 Formül hesaplanıyor: =a1*b
+cell-link-modal.tsx:376 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:377 📋 Sütunlar: Array(4)
+cell-link-modal.tsx:378 📋 İlk satır verisi: Object
+cell-link-modal.tsx:396 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:442 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:442 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:442 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:442 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:442 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:442 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:460 🏗️ Veri matrisi: Array(10)
+cell-link-modal.tsx:469 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:477 ✅ Sonuç: DetailedCellError Type: object
+cell-link-modal.tsx:491  ❌ HyperFormula hatası: DetailedCellError
+calculateFormulaPreview @ cell-link-modal.tsx:491
+cell-link-modal.tsx:375 🧮 Formül hesaplanıyor: =a1*b1
+cell-link-modal.tsx:376 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:377 📋 Sütunlar: Array(4)
+cell-link-modal.tsx:378 📋 İlk satır verisi: Object
+cell-link-modal.tsx:396 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:442 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:442 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:442 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:442 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:442 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:442 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:460 🏗️ Veri matrisi: Array(10)
+cell-link-modal.tsx:469 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:477 ✅ Sonuç: 15 Type: number
+cell-link-modal.tsx:375 🧮 Formül hesaplanıyor: =a1*b1
+cell-link-modal.tsx:376 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:377 📋 Sütunlar: Array(4)
+cell-link-modal.tsx:378 📋 İlk satır verisi: Object
+cell-link-modal.tsx:396 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:442 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:442 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:442 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:442 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:442 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:442 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:460 🏗️ Veri matrisi: Array(10)
+cell-link-modal.tsx:469 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:477 ✅ Sonuç: 15 Type: number
+cell-link-modal.tsx:271 Calculated value for a3 : 15
+cell-link-modal.tsx:284 Update response: Response
+cell-link-modal.tsx:375 🧮 Formül hesaplanıyor: =a1*b1
+cell-link-modal.tsx:376 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:377 📋 Sütunlar: Array(4)
+cell-link-modal.tsx:378 📋 İlk satır verisi: Object
+cell-link-modal.tsx:396 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:442 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:442 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:442 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:442 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:442 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:442 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:442 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:460 🏗️ Veri matrisi: Array(10)
+cell-link-modal.tsx:469 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:477 ✅ Sonuç: 15 Type: number
+cell-link-modal.tsx:296 🔍 DEBUG: Modal sonucu kontrol:
+cell-link-modal.tsx:297   - sourceRowId: 4b68d368-d4fe-40a9-b8af-014cbffab60c
+cell-link-modal.tsx:298   - sourceColumnName: a3
+cell-link-modal.tsx:299   - formula: =a1*b1
+cell-link-modal.tsx:300   - calculatedValue: 15
+cell-link-modal.tsx:301   - updateCellAfterFormula var mı? function
+cell-link-modal.tsx:304 📲 Global fonksiyon çağırılıyor: 4b68d368-d4fe-40a9-b8af-014cbffab60c, a3, 15
+dynamic-tabulator.tsx:874 🎯 Hücre güncellendi: 4b68d368-d4fe-40a9-b8af-014cbffab60c-a3 = 15
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again

@@ -1,0 +1,35 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-WERSD76P.js?v=cb915980:521 Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a>.
+    at a
+    at a
+    at https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cb915980:337:18
+    at div
+    at nav
+    at aside
+    at Sidebar (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/components/layout/sidebar.tsx:23:22)
+    at div
+    at Accounting (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/pages/accounting.tsx:29:21)
+    at Route (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cb915980:323:16)
+    at Switch (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cb915980:379:17)
+    at Router (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/App.tsx?v=Yg5OTNbwaPmbCHb0DQpIX:41:42)
+    at Provider (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.…unner/workspace/node_modules/.vite/deps/chunk-LPETRJYB.js?v=cb915980:58:15)
+    at TooltipProvider (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=cb915980:56:5)
+    at QueryClientProvider (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=cb915980:2805:3)
+    at ErrorBoundary (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+    at App
+dynamic-tabulator.tsx:101 🔗 Processing link: 
+{id: '49932e19-f57f-4492-bae6-1f57dc01b08e', sourceTableId: 'd4ddfe9d-a0dd-4318-88a9-bba1f9ad3a45', sourceRowId: '83a748af-7c7e-4ff9-b9cb-e4479eb170e7', sourceColumnName: '123', targetTableName: 'dynamic_f934196b-e041-49e3-91e1-b910a2492d55', …}
+dynamic-tabulator.tsx:268 🔍 Looking for linkKey: 83a748af-7c7e-4ff9-b9cb-e4479eb170e7_123 in linkedValues: 
+{}
+dynamic-tabulator.tsx:103 📊 Target table data: 
+Response {type: 'basic', url: 'https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3i…data/dynamic_f934196b-e041-49e3-91e1-b910a2492d55', redirected: false, status: 200, ok: true, …}
+dynamic-tabulator.tsx:115 Error fetching linked value: TypeError: tableData2.find is not a function
+    at queryFn (dynamic-tabulator.tsx:104:39)
+dynamic-tabulator.tsx:101 🔗 Processing link: 
+{id: '29c0793d-5459-4fc1-8d44-7c336cbfdbe7', sourceTableId: 'd4ddfe9d-a0dd-4318-88a9-bba1f9ad3a45', sourceRowId: '83a748af-7c7e-4ff9-b9cb-e4479eb170e7', sourceColumnName: '123', targetTableName: 'dynamic_f934196b-e041-49e3-91e1-b910a2492d55', …}
+dynamic-tabulator.tsx:103 📊 Target table data: 
+Response {type: 'basic', url: 'https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3i…data/dynamic_f934196b-e041-49e3-91e1-b910a2492d55', redirected: false, status: 200, ok: true, …}
+dynamic-tabulator.tsx:115 Error fetching linked value: TypeError: tableData2.find is not a function
+    at queryFn (dynamic-tabulator.tsx:104:39)
+﻿
+

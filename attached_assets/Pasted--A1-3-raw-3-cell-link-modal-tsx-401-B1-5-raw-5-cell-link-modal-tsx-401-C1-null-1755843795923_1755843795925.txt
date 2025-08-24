@@ -1,0 +1,37 @@
+📍 A1 = 3 (raw: 3)
+cell-link-modal.tsx:401 📍 B1 = 5 (raw: 5)
+cell-link-modal.tsx:401 📍 C1 = null (raw: )
+cell-link-modal.tsx:401 📍 D1 = null (raw: )
+cell-link-modal.tsx:409 🏗️ Veri matrisi: 
+Array(10)
+cell-link-modal.tsx:440 💥 HyperFormula hesaplama hatası: ExpectedValueOfTypeError: Expected value of type: number for config parameter: sheetId
+    at calculateFormulaPreview (cell-link-modal.tsx:412:10)
+    at cell-link-modal.tsx:449:25
+dynamic-tabulator.tsx:626 Cell link clicked: 
+Object
+@radix-ui_react-dialog.js?v=9cfa8140:336 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+cell-link-modal.tsx:364 🧮 Formül hesaplanıyor: =
+cell-link-modal.tsx:365 📊 Tablo verileri: 1 satır
+cell-link-modal.tsx:366 📋 Sütunlar: 
+Array(4)
+cell-link-modal.tsx:401 📍 A1 = 3 (raw: 3)
+cell-link-modal.tsx:401 📍 B1 = 5 (raw: 5)
+cell-link-modal.tsx:401 📍 C1 = null (raw: )
+cell-link-modal.tsx:401 📍 D1 = null (raw: )
+cell-link-modal.tsx:409 🏗️ Veri matrisi: 
+Array(10)
+cell-link-modal.tsx:440 💥 HyperFormula hesaplama hatası: ExpectedValueOfTypeError: Expected value of type: number for config parameter: sheetId
+    at calculateFormulaPreview (cell-link-modal.tsx:412:10)
+    at cell-link-modal.tsx:449:25
+﻿
+
+A more reliable and productive Chrome DevTools
+In Chrome 139, DevTools prioritized product excellence and developer experience. We tackled numerous known issues, including some years-old ones, and also made improvements to newer features. Behind the scenes, we enhanced our test coverage and migrated tests to more robust foundations.
+
+We hope you will experience these numerous subtle fixes across various panels, making your daily debugging and development workflows smoother, more reliable, and more productive.
+
+Upload images in AI assistance for styling
+To provide additional visual context to your prompts, you can now upload arbitrary images in the AI assistance panel when you start your conversation from the Elements panel with a DOM element selected as context.
+
+Check out the highlights from I/O
+Check out the features we announced at Google I/O 2025, including features with Gemini integration: modify and save CSS changes to your workspace, ask about performance insights, annotate performance findings, and more.

@@ -1,0 +1,371 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+dynamic-tabulator.tsx:728 Cell link clicked: {rowId: '4b68d368-d4fe-40a9-b8af-014cbffab60c', columnName: 'a3'}
+dialog.tsx:543  Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ dialog.tsx:543
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+(anonymous) @ react-dom.development.js:25690
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression a not recognized.'} Type: object
+cell-link-modal.tsx:494  ❌ HyperFormula hatası: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression a not recognized.'}
+calculateFormulaPreview @ cell-link-modal.tsx:494
+(anonymous) @ cell-link-modal.tsx:527
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+flushSync @ react-dom.development.js:26240
+finishEventHandler @ react-dom.development.js:3976
+batchedUpdates @ react-dom.development.js:3994
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: 3 Type: number
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: DetailedCellError {value: '#ERROR!', address: undefined, type: 'ERROR', message: "Parsing error. Expecting: one of these possible To…StringLiteral]\n  12. [ErrorLiteral]\nbut found: ''"} Type: object
+cell-link-modal.tsx:494  ❌ HyperFormula hatası: DetailedCellError {value: '#ERROR!', address: undefined, type: 'ERROR', message: "Parsing error. Expecting: one of these possible To…StringLiteral]\n  12. [ErrorLiteral]\nbut found: ''"}
+calculateFormulaPreview @ cell-link-modal.tsx:494
+(anonymous) @ cell-link-modal.tsx:527
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+flushSync @ react-dom.development.js:26240
+finishEventHandler @ react-dom.development.js:3976
+batchedUpdates @ react-dom.development.js:3994
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*b
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression b not recognized.'} Type: object
+cell-link-modal.tsx:494  ❌ HyperFormula hatası: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression b not recognized.'}
+calculateFormulaPreview @ cell-link-modal.tsx:494
+(anonymous) @ cell-link-modal.tsx:527
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+flushSync @ react-dom.development.js:26240
+finishEventHandler @ react-dom.development.js:3976
+batchedUpdates @ react-dom.development.js:3994
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*b1
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: 15 Type: number
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*b1
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: 15 Type: number
+cell-link-modal.tsx:271 Calculated value for a3 : 15
+cell-link-modal.tsx:284 Update response: Response {type: 'basic', url: 'https://4411c366-6fed-4b48-a450-57b68ccc1053-00-2s…c-table-data/4b68d368-d4fe-40a9-b8af-014cbffab60c', redirected: false, status: 200, ok: true, …}
+cell-link-modal.tsx:289 🎉 onSuccess tetiklendi! Response: {formula: Response, update: Response}
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*b1
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: 15 Type: number
+cell-link-modal.tsx:298 🔍 DEBUG: Modal sonucu kontrol:
+cell-link-modal.tsx:299   - sourceRowId: 4b68d368-d4fe-40a9-b8af-014cbffab60c
+cell-link-modal.tsx:300   - sourceColumnName: a3
+cell-link-modal.tsx:301   - formula: =a1*b1
+cell-link-modal.tsx:302   - calculatedValue: 15
+cell-link-modal.tsx:303   - updateCellAfterFormula var mı? function
+cell-link-modal.tsx:306 📲 Global fonksiyon çağırılıyor: 4b68d368-d4fe-40a9-b8af-014cbffab60c, a3, 15
+dynamic-tabulator.tsx:871 🔍 TABULATOR DEBUG:
+dynamic-tabulator.tsx:872   - Aranan rowId: 4b68d368-d4fe-40a9-b8af-014cbffab60c
+dynamic-tabulator.tsx:873   - Tüm satırlar: (2) [{…}, {…}]
+dynamic-tabulator.tsx:876   - Bulunan row: Proxy(u) {_row: p}
+dynamic-tabulator.tsx:879   - Güncellemeden önce: {id: '4b68d368-d4fe-40a9-b8af-014cbffab60c', a1: 3, a2: 5, a3: '', a4: ''}
+dynamic-tabulator.tsx:881   - Güncellemeden sonra: {id: '4b68d368-d4fe-40a9-b8af-014cbffab60c', a1: 3, a2: 5, a3: '15', a4: ''}
+dynamic-tabulator.tsx:882 🎯 Hücre güncellendi: 4b68d368-d4fe-40a9-b8af-014cbffab60c-a3 = 15
+dynamic-tabulator.tsx:728 Cell link clicked: {rowId: '4b68d368-d4fe-40a9-b8af-014cbffab60c', columnName: 'a3'}
+dialog.tsx:543  Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ dialog.tsx:543
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+(anonymous) @ react-dom.development.js:25690
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression a not recognized.'} Type: object
+cell-link-modal.tsx:494  ❌ HyperFormula hatası: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression a not recognized.'}
+calculateFormulaPreview @ cell-link-modal.tsx:494
+(anonymous) @ cell-link-modal.tsx:527
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+flushSync @ react-dom.development.js:26240
+finishEventHandler @ react-dom.development.js:3976
+batchedUpdates @ react-dom.development.js:3994
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: 3 Type: number
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: DetailedCellError {value: '#ERROR!', address: undefined, type: 'ERROR', message: "Parsing error. Expecting: one of these possible To…StringLiteral]\n  12. [ErrorLiteral]\nbut found: ''"} Type: object
+cell-link-modal.tsx:494  ❌ HyperFormula hatası: DetailedCellError {value: '#ERROR!', address: undefined, type: 'ERROR', message: "Parsing error. Expecting: one of these possible To…StringLiteral]\n  12. [ErrorLiteral]\nbut found: ''"}
+calculateFormulaPreview @ cell-link-modal.tsx:494
+(anonymous) @ cell-link-modal.tsx:527
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+flushSync @ react-dom.development.js:26240
+finishEventHandler @ react-dom.development.js:3976
+batchedUpdates @ react-dom.development.js:3994
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*b
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression b not recognized.'} Type: object
+cell-link-modal.tsx:494  ❌ HyperFormula hatası: DetailedCellError {value: '#NAME?', address: 'Sheet1!K11', type: 'NAME', message: 'Named expression b not recognized.'}
+calculateFormulaPreview @ cell-link-modal.tsx:494
+(anonymous) @ cell-link-modal.tsx:527
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+commitRootImpl @ react-dom.development.js:26974
+commitRoot @ react-dom.development.js:26721
+performSyncWorkOnRoot @ react-dom.development.js:26156
+flushSyncCallbacks @ react-dom.development.js:12042
+flushSync @ react-dom.development.js:26240
+finishEventHandler @ react-dom.development.js:3976
+batchedUpdates @ react-dom.development.js:3994
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+cell-link-modal.tsx:378 🧮 Formül hesaplanıyor: =a1*b1
+cell-link-modal.tsx:379 📊 Tablo verileri: 2 satır
+cell-link-modal.tsx:380 📋 Sütunlar: (4) ['a1', 'a2', 'a3', 'a4']
+cell-link-modal.tsx:381 📋 İlk satır verisi: {a1: 3, a2: 5, a3: '', a4: ''}
+cell-link-modal.tsx:399 📑 Sheet ID: Sheet1 Type: string
+cell-link-modal.tsx:445 📍 A1 = 3 (raw: 3) [sütun: a1]
+cell-link-modal.tsx:445 📍 B1 = 5 (raw: 5) [sütun: a2]
+cell-link-modal.tsx:445 📍 C1 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D1 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:445 📍 A2 = 7 (raw: 7) [sütun: a1]
+cell-link-modal.tsx:445 📍 B2 = 8 (raw: 8) [sütun: a2]
+cell-link-modal.tsx:445 📍 C2 = null (raw: ) [sütun: a3]
+cell-link-modal.tsx:445 📍 D2 = null (raw: ) [sütun: a4]
+cell-link-modal.tsx:463 🏗️ Veri matrisi: (10) [Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10), Array(10)]
+cell-link-modal.tsx:472 📝 Formül 11:11 hücresine yerleştiriliyor
+cell-link-modal.tsx:480 ✅ Sonuç: 15 Type: number

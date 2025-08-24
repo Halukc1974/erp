@@ -1,0 +1,29 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-WERSD76P.js?v=cb915980:521 Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a>.
+    at a
+    at a
+    at https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cb915980:337:18
+    at div
+    at nav
+    at aside
+    at Sidebar (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/components/layout/sidebar.tsx:23:22)
+    at div
+    at Accounting (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/pages/accounting.tsx:29:21)
+    at Route (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cb915980:323:16)
+    at Switch (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=cb915980:379:17)
+    at Router (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/App.tsx?v=pyUjEfnHZVtmOHvEKV68L:41:42)
+    at Provider (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LPETRJYB.js?v=cb915980:58:15)
+    at TooltipProvider (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=cb915980:56:5)
+    at QueryClientProvider (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=cb915980:2805:3)
+    at ErrorBoundary (https://1a59728f-2e15-4cce-956c-6d0ba46f25c1-00-3ianbpk4rz5ac.riker.replit.dev/src/components/ErrorBoundary.tsx:7:5)
+    at App
+printWarning @ chunk-WERSD76P.js?v=cb915980:521
+dynamic-tabulator.tsx:101 🔗 Processing link: Object
+dynamic-tabulator.tsx:269 🔍 Looking for linkKey: 83a748af-7c7e-4ff9-b9cb-e4479eb170e7_123 in linkedValues: Object
+dynamic-tabulator.tsx:104 📊 Target table data: Array(1)
+dynamic-tabulator.tsx:106 🎯 Target row found: Object
+dynamic-tabulator.tsx:111 ✅ Linked value set: 83a748af-7c7e-4ff9-b9cb-e4479eb170e7_123 = dsgdgdsgdsgdsg
+dynamic-tabulator.tsx:101 🔗 Processing link: Object
+dynamic-tabulator.tsx:104 📊 Target table data: Array(1)
+dynamic-tabulator.tsx:106 🎯 Target row found: Object
+dynamic-tabulator.tsx:111 ✅ Linked value set: 83a748af-7c7e-4ff9-b9cb-e4479eb170e7_123 = dsgdgdsgdsgdsg
