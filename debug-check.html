@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase Test</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Supabase Connection Test</h1>
+    <div id="status">Testing...</div>
+    
+    <script>
+        const SUPABASE_URL = 'https://xtsczsqpetyumpkawiwl.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0c2N6c3FwZXR5dW1wa2F3aXdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxNDk4NDMsImV4cCI6MjA3MDcyNTg0M30.tEbu8QHtWQM00zLpkt5IuOwpeo61cn7LJ0N8fR6FCU4'
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
+        async function testConnection() {
+            try {
+                const { data, error } = await supabase.auth.getSession()
+                console.log('Session check:', { data, error })
+                
+                document.getElementById('status').innerHTML = error ? 
+                    `<p style="color: red;">Error: ${error.message}</p>` : 
+                    `<p style="color: green;">✅ Supabase bağlantısı başarılı!</p><pre>${JSON.stringify(data, null, 2)}</pre>`
+            } catch (e) {
+                console.error('Connection error:', e)
+                document.getElementById('status').innerHTML = `<p style="color: red;">Connection Error: ${e.message}</p>`
+            }
+        }
+        
+        testConnection()
+    </script>
+</body>
+</html>

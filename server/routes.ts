@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
+import { db, dbHelpers } from "./db"; // PostgreSQL connection
 import { 
   insertSupplierSchema,
   insertCustomerSchema,
@@ -19,9 +20,97 @@ import {
   insertDynamicTableDataSchema,
   insertCellLinkSchema,
   insertCellFormulaSchema,
-} from "@shared/schema";
+} from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Database API endpoints (no auth required for static hosting)
+  app.get('/api/database/tables', async (req, res) => {
+    try {
+      const tables = await dbHelpers.getTables();
+      res.json(tables);
+    } catch (error) {
+      console.error('Error fetching tables:', error);
+      res.status(500).json({ error: 'Failed to fetch tables' });
+    }
+  });
+
+  app.get('/api/database/table/:tableName', async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const limit = parseInt(req.query.limit as string) || 100;
+      const data = await dbHelpers.getTableData(tableName, limit);
+      res.json(data);
+    } catch (error) {
+      console.error(`Error fetching ${req.params.tableName}:`, error);
+      res.status(500).json({ error: 'Failed to fetch table data' });
+    }
+  });
+
+  app.get('/api/database/suppliers', async (req, res) => {
+    try {
+      const suppliers = await dbHelpers.getSuppliers();
+      res.json(suppliers);
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+      res.status(500).json({ error: 'Failed to fetch suppliers' });
+    }
+  });
+
+  app.get('/api/database/customers', async (req, res) => {
+    try {
+      const customers = await dbHelpers.getCustomers();
+      res.json(customers);
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      res.status(500).json({ error: 'Failed to fetch customers' });
+    }
+  });
+
+  app.get('/api/database/purchase-orders', async (req, res) => {
+    try {
+      const orders = await dbHelpers.getPurchaseOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching purchase orders:', error);
+      res.status(500).json({ error: 'Failed to fetch purchase orders' });
+    }
+  });
+
+  app.get('/api/database/sales-orders', async (req, res) => {
+    try {
+      const orders = await dbHelpers.getSalesOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error('Error fetching sales orders:', error);
+      res.status(500).json({ error: 'Failed to fetch sales orders' });
+    }
+  });
+
+  app.get('/api/database/dashboard-stats', async (req, res) => {
+    try {
+      const stats = await dbHelpers.getDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    }
+  });
+
+  // Execute custom SQL query
+  app.post('/api/database/query', async (req, res) => {
+    try {
+      const { sql, params } = req.body;
+      if (!sql) {
+        return res.status(400).json({ error: 'SQL query required' });
+      }
+      const result = await dbHelpers.query(sql, params);
+      res.json(result);
+    } catch (error) {
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Failed to execute query' });
+    }
+  });
+
   // Auth middleware
   await setupLocalAuth(app);
 

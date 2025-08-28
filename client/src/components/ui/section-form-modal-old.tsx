@@ -46,13 +46,12 @@ export function SectionFormModal({ open, onClose, editingSection }: SectionFormM
       queryClient.invalidateQueries({ queryKey: ['menu-sections'] });
       queryClient.invalidateQueries({ queryKey: ['menu-pages'] });
       toast({ title: "Bölüm başarıyla oluşturuldu" });
-      form.reset();
       onClose();
+      form.reset();
     },
-    onError: (error) => {
-      console.error('Create section error:', error);
-      toast({ title: "Bölüm oluşturulurken hata oluştu", variant: "destructive" });
-    }
+    onError: () => {
+      toast({ title: "Hata", description: "Bölüm oluşturulamadı", variant: "destructive" });
+    },
   });
 
   // Update section mutation
@@ -62,17 +61,19 @@ export function SectionFormModal({ open, onClose, editingSection }: SectionFormM
         title: data.title,
       });
     },
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['menu-sections'] });
-      queryClient.invalidateQueries({ queryKey: ['menu-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/menu-sections'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/menu-pages'] });
       toast({ title: "Bölüm başarıyla güncellendi" });
-      form.reset();
       onClose();
+      form.reset();
     },
-    onError: (error) => {
-      console.error('Update section error:', error);
-      toast({ title: "Bölüm güncellenirken hata oluştu", variant: "destructive" });
-    }
+    onError: () => {
+      toast({ title: "Hata", description: "Bölüm güncellenemedi", variant: "destructive" });
+    },
   });
 
   const onSubmit = (data: SectionFormData) => {
@@ -98,10 +99,10 @@ export function SectionFormModal({ open, onClose, editingSection }: SectionFormM
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {editingSection ? "Bölümü Düzenle" : "Yeni Bölüm Ekle"}
+            {editingSection ? "Bölümü Düzenle" : "Yeni Bölüm Oluştur"}
           </DialogTitle>
         </DialogHeader>
-
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -112,9 +113,9 @@ export function SectionFormModal({ open, onClose, editingSection }: SectionFormM
                   <FormLabel>Bölüm Adı</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="Örn: İnsan Kaynakları" 
+                      placeholder="Örn: Muhasebe, Satış, İnsan Kaynakları" 
+                      data-testid="input-section-title"
                       {...field} 
-                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -122,17 +123,21 @@ export function SectionFormModal({ open, onClose, editingSection }: SectionFormM
               )}
             />
 
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
                 onClick={onClose}
-                disabled={isLoading}
+                data-testid="button-cancel"
               >
                 İptal
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Kaydediliyor..." : editingSection ? "Güncelle" : "Ekle"}
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                data-testid="button-save"
+              >
+                {isLoading ? "Kaydediliyor..." : (editingSection ? "Güncelle" : "Oluştur")}
               </Button>
             </div>
           </form>

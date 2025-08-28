@@ -20,50 +20,25 @@ export default function Login() {
     setLoading(true);
 
     try {
-      console.log("Attempting login with:", { email }); // Debug log
-      
-      // Client-side authentication - hardcoded credentials
-      const validUsers = [
-        { email: 'celebi.haluk@gmail.com', password: 'A1s1d1f1a1s1d1f1!' },
-        { email: 'admin@example.com', password: 'admin123' }
-      ];
-      
-      const user = validUsers.find(u => u.email === email && u.password === password);
-      
-      if (!user) {
-        throw new Error('Invalid credentials');
+      const { data, error } = await auth.signIn(email, password);
+
+      if (error) {
+        toast({
+          title: "Login failed",
+          description: error.message || "Invalid credentials. Please try again.",
+          variant: "destructive",
+        });
+      } else if (data.user) {
+        toast({
+          title: "Login successful", 
+          description: "Welcome to the ERP system!",
+        });
+        setLocation("/");
       }
-      
-      // Store auth data
-      const authData = {
-        user: { email: user.email, id: 1 },
-        token: btoa(JSON.stringify({ email: user.email, timestamp: Date.now() })),
-        timestamp: Date.now()
-      };
-      
-      localStorage.setItem('auth_data', JSON.stringify(authData));
-      
-      console.log("Login successful for user:", user.email); // Debug log
-      console.log("Auth data stored:", authData); // Debug log
-      
-      toast({
-        title: "Login successful", 
-        description: "Welcome to the ERP system!",
-      });
-      
-      // Force a re-render by triggering storage event
-      window.dispatchEvent(new Event('storage'));
-      
-      // Small delay to ensure auth state is updated
-      setTimeout(() => {
-        setLocation("/dashboard");
-      }, 100);
-      
     } catch (error: any) {
-      console.error("Login error:", error); // Debug log
       toast({
-        title: "Login failed",
-        description: error.message || "Invalid credentials. Please try again.",
+        title: "Login error",
+        description: error.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {

@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import Sidebar from "@/components/layout/sidebar";
-import Header from "@/components/layout/header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
+import { Sidebar } from "../components/layout/sidebar";
+import Header from "../components/layout/header";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import { Plus, DollarSign, Receipt, PieChart, FileCheck } from "lucide-react";
-import DynamicTabulator from "@/components/ui/dynamic-tabulator";
+import DynamicTabulator from "../components/ui/dynamic-tabulator";
 
 export default function OverheadCosts() {
   const { toast } = useToast();

@@ -3,15 +3,32 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import type { MenuSection, MenuPage } from "@shared/schema";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Input } from "../ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Button } from "../ui/button";
+import { useToast } from "../../hooks/use-toast";
+import { dbService } from "../../lib/database";
 import * as LucideIcons from "lucide-react";
+
+// Type definitions
+interface MenuSection {
+  id: string;
+  title: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+interface MenuPage {
+  id: string;
+  title: string;
+  href: string;
+  icon: string;
+  sectionId?: string;
+  sort_order: number;
+  is_active: boolean;
+}
 
 const pageFormSchema = z.object({
   title: z.string().min(1, "Sayfa adı gerekli"),
@@ -57,56 +74,65 @@ export function PageFormModal({ open, onClose, sections, editingPage }: PageForm
   const createPageMutation = useMutation({
     mutationFn: async (data: PageFormData) => {
       const pageData = {
-        ...data,
-        sortOrder: 999, // Will be handled by backend
-        isActive: true,
+        title: data.title,
+        href: data.href,
+        icon: data.icon,
+        section_id: data.sectionId === 'none' ? null : data.sectionId,
+        sort_order: 999, // Will be handled by backend
+        is_active: true,
       };
       
       // Create the page first
-      const page = await apiRequest('/api/menu-pages', {
-        method: 'POST',
-        body: JSON.stringify(pageData),
-      });
+      const page = await dbService.insertData('menu_pages', pageData);
       
       // If it's a table page, create a dynamic table for it
       if (data.pageType === 'table') {
-        await apiRequest('/api/dynamic-tables', {
-          method: 'POST',
-          body: JSON.stringify({
-            name: data.href.replace(/^\//, '').replace(/\//g, '_'), // Convert URL to valid table name
-            displayName: data.title,
-            description: `${data.title} için dinamik tablo`,
-            isActive: true,
-          }),
+        await dbService.insertData('dynamic_tables', {
+          name: data.href.replace(/^\//, '').replace(/\//g, '_'), // Convert URL to valid table name
+          display_name: data.title,
+          description: `${data.title} için dinamik tablo`,
+          is_active: true,
         });
       }
       
       return page;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/menu-pages'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dynamic-tables'] });
+      queryClient.invalidateQueries({ queryKey: ['menu-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['menu-sections'] });
+      queryClient.invalidateQueries({ queryKey: ['dynamic-tables'] });
       toast({ title: "Sayfa başarıyla oluşturuldu" });
       onClose();
       form.reset();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Page creation error:', error);
       toast({ title: "Hata", description: "Sayfa oluşturulamadı", variant: "destructive" });
     },
   });
 
   // Update page mutation
   const updatePageMutation = useMutation({
-    mutationFn: (data: PageFormData) => apiRequest(`/api/menu-pages/${editingPage?.id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+    mutationFn: async (data: PageFormData) => {
+      if (!editingPage?.id) throw new Error('No page ID provided');
+      
+      const updateData = {
+        title: data.title,
+        href: data.href,
+        icon: data.icon,
+        section_id: data.sectionId === 'none' ? null : data.sectionId,
+      };
+      
+      return await dbService.updateData('menu_pages', editingPage.id, updateData);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/menu-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['menu-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['menu-sections'] });
       toast({ title: "Sayfa başarıyla güncellendi" });
       onClose();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Page update error:', error);
       toast({ title: "Hata", description: "Sayfa güncellenemedi", variant: "destructive" });
     },
   });

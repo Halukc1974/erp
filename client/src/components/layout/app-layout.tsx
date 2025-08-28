@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import Sidebar from "@/components/layout/sidebar";
-import Header from "@/components/layout/header";
+import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../../hooks/use-toast";
+import { Sidebar } from "./sidebar";
+import Header from "./header";
 
 interface AppLayoutProps {
   children: React.ReactNode;
