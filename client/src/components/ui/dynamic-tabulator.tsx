@@ -370,6 +370,12 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       
       for (const link of cellLinks) {
         try {
+          // Target table name kontrolü
+          if (!link.targetTableName || link.targetTableName === 'undefined') {
+            console.warn('⚠️ Skipping link with undefined target table name:', link);
+            continue;
+          }
+          
           // Target table'ın UUID'sini bul
           const targetTables = await dbService.fetchTable('dynamic_tables', {
             filter: `name=eq.${link.targetTableName}`
@@ -735,8 +741,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       // Convert to Supabase format for dynamic_table_data
       const supabaseData = {
         table_id: actualTableId, // UUID string
-        row_data: JSON.stringify(rowData), // Store as JSONB
-        user_id: 'system' // Default user ID
+        row_data: JSON.stringify(rowData) // Store as JSONB
       };
       
       console.log(`📤 Final row data for Supabase:`, supabaseData);
@@ -918,8 +923,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
                     row_id: id, // UUID kullan (string)
                     column_name: field,
                     formula_text: value,
-                    calculated_value: calculatedValue?.toString() || '',
-                    user_id: 'system'
+                    calculated_value: calculatedValue?.toString() || ''
                   };
                   console.log('📤 Saving formula:', formulaSupabaseData);
                   await dbService.insertData('cell_formulas', formulaSupabaseData);

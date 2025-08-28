@@ -180,8 +180,7 @@ export default function CellLinkModal({
         source_column_name: linkData.sourceColumnName,
         target_table_name: linkData.targetTableName,
         target_row_id: linkData.targetRowId,
-        target_field_name: linkData.targetFieldName,
-        user_id: 'system'
+        target_field_name: linkData.targetFieldName
       });
     },
     onSuccess: () => {
