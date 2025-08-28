@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Plus, Settings, X, Edit3 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { loadTabulator } from "@/lib/tabulator";
-import { apiRequest } from "@/lib/queryClient";
-import CellLinkModal from "@/components/ui/cell-link-modal";
+import { useToast } from "../../hooks/use-toast";
+import { loadTabulator } from "../../lib/tabulator";
+import { dbService } from "../../lib/database";
+import CellLinkModal from "../ui/cell-link-modal";
 import { HyperFormula } from "hyperformula";
 
 interface DynamicColumn {
@@ -63,6 +63,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
   const tabulatorInstance = useRef<any>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [actualTableUUID, setActualTableUUID] = useState<string | null>(null);
 
   // HyperFormula ile tablo içinde formül hesaplama - columns parametresi ile
   const calculateFormulaInTable = (formula: string, data: any[], columnsData?: DynamicColumn[]): string | null => {
@@ -270,6 +271,43 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     sourceColumnName: string;
   } | null>(null);
   const [editingColumn, setEditingColumn] = useState<DynamicColumn | null>(null);
+
+  // UUID lookup sistemi
+  useEffect(() => {
+    const lookupTableUUID = async () => {
+      if (!tableId) return;
+      
+      console.log(`🔍 Looking up UUID for tableId: "${tableId}"`);
+      
+      // Eğer zaten UUID formatındaysa, doğrudan kullan
+      if (tableId.length === 36 && tableId.includes('-')) {
+        setActualTableUUID(tableId);
+        console.log(`✅ Already UUID format: ${tableId}`);
+        return;
+      }
+      
+      try {
+        // dynamic_tables'da name ile ara
+        const tables = await dbService.fetchTable('dynamic_tables', {
+          filter: `name=eq.${tableId}` // Doğru filter format
+        });
+        
+        if (tables && tables.length > 0) {
+          setActualTableUUID(tables[0].id);
+          console.log(`✅ Found UUID: ${tables[0].id} for name: ${tableId}`);
+        } else {
+          console.warn(`⚠️ Table not found for name: ${tableId}`);
+          setActualTableUUID(null);
+        }
+      } catch (error) {
+        console.error(`❌ Error looking up table UUID:`, error);
+        setActualTableUUID(null);
+      }
+    };
+    
+    lookupTableUUID();
+  }, [tableId]);
+
   const [columnForm, setColumnForm] = useState({
     name: "",
     displayName: "",
@@ -282,26 +320,49 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
   });
 
   // Fetch table columns
-  const { data: columns = [], isLoading: columnsLoading } = useQuery<DynamicColumn[]>({
-    queryKey: [`/api/dynamic-tables/${tableId}/columns`],
-    enabled: !!tableId,
+  const { data: columns = [], isLoading: columnsLoading, error: columnsError } = useQuery<DynamicColumn[]>({
+    queryKey: [`dynamic-columns-${actualTableUUID || tableId}`],
+    queryFn: async () => {
+      console.log(`🔍 Fetching columns for UUID: ${actualTableUUID}`);
+      const result = await dbService.fetchTable('dynamic_columns', {
+        filter: `table_id=eq.${actualTableUUID}`,
+        order: 'sort_order'
+      });
+      console.log(`✅ Columns fetched:`, result);
+      return result;
+    },
+    enabled: !!actualTableUUID && actualTableUUID.length > 0,
+    retry: 1,
   });
 
   // Fetch table data
-  const { data: tableData = [], isLoading: dataLoading } = useQuery<any[]>({
-    queryKey: [`/api/dynamic-tables/${tableId}/data`],
-    enabled: !!tableId,
+  const { data: tableData = [], isLoading: dataLoading, error: dataError } = useQuery<any[]>({
+    queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`],
+    queryFn: async () => {
+      console.log(`🔍 Fetching data for UUID: ${actualTableUUID}`);
+      const result = await dbService.fetchTable('dynamic_table_data', {
+        filter: `table_id=eq.${actualTableUUID}`,
+        order: 'id'
+      });
+      console.log(`✅ Data fetched:`, result);
+      return result;
+    },
+    enabled: !!actualTableUUID && actualTableUUID.length > 0,
+    retry: 1,
   });
 
-  // Fetch cell links for this table
+  // Fetch cell links for this table  
   const { data: cellLinks = [] } = useQuery<any[]>({
-    queryKey: [`/api/cell-links/${tableId}`],
-    enabled: !!tableId,
+    queryKey: [`cell-links-${actualTableUUID || tableId}`],
+    queryFn: () => dbService.fetchTable('cell_links', {
+      filter: `source_table_id=eq.${actualTableUUID}` // Doğru filter format
+    }),
+    enabled: !!actualTableUUID,
   });
 
   // Fetch linked values for all cell links
   const { data: linkedValues = {} } = useQuery({
-    queryKey: [`/api/cell-links/${tableId}/values`],
+    queryKey: [`linked-values-${actualTableUUID || tableId}`],
     queryFn: async () => {
       if (cellLinks.length === 0) return {};
       
@@ -309,13 +370,22 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       
       for (const link of cellLinks) {
         try {
-          const response = await fetch(`/api/table-data/${link.targetTableName}`);
-          const tableData = await response.json();
-          const targetRow = tableData.find((row: any) => row.id === link.targetRowId);
+          // Target table'ın UUID'sini bul
+          const targetTables = await dbService.fetchTable('dynamic_tables', {
+            filter: `name=eq.${link.targetTableName}`
+          });
           
-          if (targetRow && targetRow[link.targetFieldName]) {
-            const linkKey = `${link.sourceRowId}_${link.sourceColumnName}`;
-            values[linkKey] = targetRow[link.targetFieldName];
+          if (targetTables.length > 0) {
+            const targetTableData = await dbService.fetchTable('dynamic_table_data', {
+              filter: `table_id=eq.${targetTables[0].id}`
+            });
+            
+            const targetRow = targetTableData.find((row: any) => row.id === link.targetRowId);
+            
+            if (targetRow && targetRow.row_data?.[link.targetFieldName]) {
+              const linkKey = `${link.sourceRowId}_${link.sourceColumnName}`;
+              values[linkKey] = targetRow.row_data[link.targetFieldName];
+            }
           }
         } catch (error) {
           console.error('Error fetching linked value:', error);
@@ -327,10 +397,14 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     enabled: cellLinks.length > 0,
   });
 
-  // Fetch cell formulas for this table
+  // Fetch cell formulas for this table - Supabase'den dynamic_cell_formulas
   const { data: cellFormulas = [] } = useQuery<any[]>({
-    queryKey: [`/api/cell-formulas/${tableId}`],
-    enabled: !!tableId,
+    queryKey: [`dynamic_cell_formulas-${actualTableUUID || tableId}`],
+    queryFn: () => dbService.fetchTable('dynamic_cell_formulas', {
+      filter: `table_id=eq.${actualTableUUID}`,
+      order: 'created_at'
+    }),
+    enabled: !!actualTableUUID,
   });
 
   // 🧮 AUTO-RECALCULATION: Tüm formülleri yeniden hesaplama fonksiyonu
@@ -359,12 +433,11 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           console.log(`📊 Formül güncellendi: ${formula.rowId}-${formula.columnName} = ${newValue}`);
           
           // Database'deki formül değerini güncelle
-          await apiRequest(`/api/cell-formulas/${formula.id}`, {
-            method: 'PATCH',
-            body: JSON.stringify({
-              calculatedValue: String(newValue)
-            })
-          });
+          const formulaUpdateData = {
+            calculated_value: String(newValue),
+            updated_at: new Date().toISOString()
+          };
+          await dbService.updateData('dynamic_cell_formulas', formula.id, formulaUpdateData);
 
           // Global updateCellAfterFormula fonksiyonunu kullan
           if (typeof (window as any).updateCellAfterFormula === 'function') {
@@ -379,8 +452,8 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     }
 
     // Query'leri invalidate et
-    queryClient.invalidateQueries({ queryKey: [`/api/cell-formulas/${tableId}`] });
-    queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/data`] });
+    queryClient.invalidateQueries({ queryKey: [`dynamic_cell_formulas-${actualTableUUID || tableId}`] });
+    queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
     
     console.log('✅ Tüm formüller yeniden hesaplandı');
   };
@@ -402,7 +475,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     console.log(`🔄 Sütun mapping: "${changedField}" -> "${columnLetter}" (index: ${columnIndex})`);
 
     // Değişen field için tüm olası hücre referansları oluştur (A1, A2, A3... vs B1, B2, B3...)
-    const possibleCellRefs = [];
+    const possibleCellRefs: string[] = [];
     for (let row = 1; row <= Math.max(currentRowIds.length, 10); row++) {
       possibleCellRefs.push(`${columnLetter}${row}`.toLowerCase());
     }
@@ -470,13 +543,12 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           
           // 🔥 KRITIK: Database'deki formül değerini güncelle VE table row'unu da güncelle
           try {
-            // 1. Önce formül değerini güncelle
-            await apiRequest(`/api/cell-formulas/${formula.id}`, {
-              method: 'PATCH',
-              body: JSON.stringify({
-                calculatedValue: String(newCalculatedValue)
-              })
-            });
+            // 1. Önce formül değerini güncelle (dynamic_cell_formulas tablosunda)
+            const formulaUpdateData = {
+              calculated_value: String(newCalculatedValue),
+              updated_at: new Date().toISOString()
+            };
+            await dbService.updateData('dynamic_cell_formulas', formula.id, formulaUpdateData);
             console.log(`✅ Formül database'de güncellendi: ${formula.id} = ${newCalculatedValue}`);
 
             // 2. SONRA table row'unu da hesaplanan değer ile güncelle
@@ -485,10 +557,11 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
               const { id, ...rowDataWithoutId } = currentRowData;
               const updatedRowData = { ...rowDataWithoutId, [formula.columnName]: String(newCalculatedValue) };
               
-              await apiRequest(`/api/dynamic-table-data/${formula.rowId}`, {
-                method: 'PUT',
-                body: JSON.stringify({ rowData: updatedRowData })
-              });
+              const rowUpdateData = {
+                row_data: JSON.stringify(updatedRowData),
+                updated_at: new Date().toISOString()
+              };
+              await dbService.updateData('dynamic_table_data', formula.rowId, rowUpdateData);
               console.log(`✅ Row data güncellendi: ${formula.rowId} ${formula.columnName} = ${newCalculatedValue}`);
             }
 
@@ -516,20 +589,40 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     }
 
     // Query'leri invalidate et
-    queryClient.invalidateQueries({ queryKey: [`/api/cell-formulas/${tableId}`] });
-    queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/data`] });
+    queryClient.invalidateQueries({ queryKey: [`dynamic_cell_formulas-${actualTableUUID || tableId}`] });
+    queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
     
     console.log(`✅ ${changedField} için bağımlı formüller yeniden hesaplandı`);
   };
 
   // Create column mutation
   const createColumnMutation = useMutation({
-    mutationFn: (columnData: any) => apiRequest(`/api/dynamic-tables/${tableId}/columns`, {
-      method: "POST",
-      body: JSON.stringify(columnData),
-    }),
+    mutationFn: async (columnData: any) => {
+      console.log(`🔍 DEBUG: Using actualTableUUID = "${actualTableUUID}"`);
+      
+      if (!actualTableUUID) {
+        throw new Error('Table UUID not found');
+      }
+      
+      // Convert to Supabase format
+      const supabaseData = {
+        table_id: actualTableUUID, // Use actual UUID
+        name: columnData.name,
+        display_name: columnData.displayName,
+        data_type: columnData.dataType,
+        is_required: columnData.isRequired,
+        is_editable: columnData.isEditable,
+        default_value: columnData.defaultValue || null,
+        options: columnData.options ? JSON.stringify(columnData.options) : null,
+        width: columnData.width || 150,
+        sort_order: columnData.sortOrder || 999
+      };
+      
+      console.log(`📤 Final column data for Supabase:`, supabaseData);
+      return await dbService.insertData('dynamic_columns', supabaseData);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/columns`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic-columns-${actualTableUUID}`] });
       setShowColumnDialog(false);
       setColumnForm({
         name: "",
@@ -557,12 +650,23 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // Update column mutation
   const updateColumnMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => apiRequest(`/api/dynamic-columns/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      // Convert to Supabase format
+      const supabaseData = {
+        name: data.name,
+        display_name: data.displayName,
+        data_type: data.dataType,
+        is_required: data.isRequired,
+        is_editable: data.isEditable,
+        default_value: data.defaultValue || null,
+        options: data.options ? JSON.stringify(data.options) : null,
+        width: data.width || 150,
+        sort_order: data.sortOrder || 999
+      };
+      return await dbService.updateData('dynamic_columns', id, supabaseData);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/columns`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic-columns-${actualTableUUID || tableId}`] });
       setEditingColumn(null);
       toast({
         title: "Başarılı",
@@ -580,11 +684,11 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // Delete column mutation
   const deleteColumnMutation = useMutation({
-    mutationFn: (id: string) => apiRequest(`/api/dynamic-columns/${id}`, {
-      method: "DELETE",
-    }),
+    mutationFn: async (id: string) => {
+      return await dbService.deleteData('dynamic_columns', id);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/columns`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic-columns-${actualTableUUID || tableId}`] });
       toast({
         title: "Başarılı",
         description: "Sütun başarıyla silindi",
@@ -601,12 +705,45 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // Create row mutation
   const createRowMutation = useMutation({
-    mutationFn: (rowData: any) => apiRequest(`/api/dynamic-tables/${tableId}/data`, {
-      method: "POST",
-      body: JSON.stringify({ rowData }),
-    }),
+    mutationFn: async (rowData: any) => {
+      console.log(`🔍 Row DEBUG: tableId = "${tableId}", looking up UUID`);
+      
+      // TableId'yi UUID'ye çevirmeliyiz
+      let actualTableId: string;
+      
+      try {
+        if (isNaN(parseInt(tableId))) {
+          // tableId string (table name) 
+          const tables = await dbService.fetchTable('dynamic_tables', {
+            filter: `name=eq.${tableId}`
+          });
+          
+          if (tables && tables.length > 0) {
+            actualTableId = tables[0].id; // UUID string
+            console.log(`✅ Found table UUID for row: ${actualTableId}`);
+          } else {
+            actualTableId = "d4ddfe9d-a0dd-4318-88a9-bba1f9ad3a45"; // Fallback UUID
+          }
+        } else {
+          actualTableId = "d4ddfe9d-a0dd-4318-88a9-bba1f9ad3a45"; // Fallback UUID
+        }
+      } catch (error) {
+        console.error('Error looking up table UUID for row:', error);
+        actualTableId = "d4ddfe9d-a0dd-4318-88a9-bba1f9ad3a45"; // Fallback UUID
+      }
+      
+      // Convert to Supabase format for dynamic_table_data
+      const supabaseData = {
+        table_id: actualTableId, // UUID string
+        row_data: JSON.stringify(rowData), // Store as JSONB
+        user_id: 'system' // Default user ID
+      };
+      
+      console.log(`📤 Final row data for Supabase:`, supabaseData);
+      return await dbService.insertData('dynamic_table_data', supabaseData);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/data`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
       toast({
         title: "Başarılı",
         description: "Satır başarıyla eklendi",
@@ -623,12 +760,16 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // Update row mutation
   const updateRowMutation = useMutation({
-    mutationFn: ({ id, rowData }: { id: string; rowData: any }) => apiRequest(`/api/dynamic-table-data/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({ rowData }),
-    }),
+    mutationFn: async ({ id, rowData }: { id: string; rowData: any }) => {
+      // Convert to Supabase format for dynamic_table_data
+      const supabaseData = {
+        row_data: JSON.stringify(rowData), // Store as JSONB
+        updated_at: new Date().toISOString()
+      };
+      return await dbService.updateData('dynamic_table_data', id, supabaseData);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/data`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
     },
     onError: () => {
       toast({
@@ -641,7 +782,30 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // Convert columns to Tabulator format
   const getTabulatorColumns = () => {
-    if (!columns.length) return [];
+    console.log('🔍 getTabulatorColumns called, columns:', columns);
+    
+    // Eğer columns yoksa, minimal bir column ekle
+    if (!columns || columns.length === 0) {
+      console.log('⚠️ No columns found, creating default columns');
+      return [
+        {
+          title: "ID",
+          field: "id", 
+          width: 100,
+          formatter: "html"
+        },
+        {
+          title: "Data",
+          field: "_fallback",
+          width: 200,
+          editor: "input",
+          formatter: function(cell: any) {
+            const data = cell.getRow().getData();
+            return `<pre style="font-size:11px;">${JSON.stringify(data, null, 1)}</pre>`;
+          }
+        }
+      ];
+    }
 
     const tabulatorColumns = columns
       .sort((a: DynamicColumn, b: DynamicColumn) => a.sortOrder - b.sortOrder)
@@ -653,10 +817,6 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           resizable: true,
           headerSort: true,
           editor: col.isEditable ? getEditorForType(col.dataType) : false,
-          // 🔍 DEBUG: Column editable durumu
-          cellDblClick: function() {
-            console.log(`🔍 Column "${col.name}" editable: ${col.isEditable}, editor type: ${col.isEditable ? getEditorForType(col.dataType) : 'false'}`);
-          },
           formatter: function(cell: any) {
             const rowId = cell.getRow().getData().id;
             const columnName = col.name;
@@ -730,7 +890,10 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             
             // Formül kontrolü - eğer = ile başlıyorsa HyperFormula ile hesapla
             if (typeof value === 'string' && value.startsWith('=')) {
-              const calculatedValue = calculateFormulaInTable(value, tableData || [], columns);
+              const calculatedValue = calculateFormulaInTable(value, 
+                tabulatorInstance.current ? tabulatorInstance.current.getData() : (tableData || []), 
+                columns.length > 0 ? columns : []
+              );
               console.log(`🧮 Formül hesaplandı: "${value}" = ${calculatedValue}`);
               
               // Formülü kaydet
@@ -749,24 +912,31 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
               // 🔥 KRITIK: Formülü database'e kaydet VE table row'unu da güncelle
               const saveFormulaAndUpdateRow = async () => {
                 try {
-                  // 1. Önce formülü kaydet
-                  await apiRequest('/api/cell-formulas', {
-                    method: 'POST',
-                    body: JSON.stringify(formulaData)
-                  });
+                  // 1. Önce formülü kaydet (cell_formulas tablosuna)
+                  const formulaSupabaseData = {
+                    table_id: actualTableUUID, // UUID kullan
+                    row_id: id, // UUID kullan (string)
+                    column_name: field,
+                    formula_text: value,
+                    calculated_value: calculatedValue?.toString() || '',
+                    user_id: 'system'
+                  };
+                  console.log('📤 Saving formula:', formulaSupabaseData);
+                  await dbService.insertData('cell_formulas', formulaSupabaseData);
                   console.log(`✅ Formül kaydedildi: ${value} = ${calculatedValue}`);
                   
                   // 2. SONRA table row'unu da hesaplanan değer ile güncelle
                   const updatedRowDataWithFormula = { ...updatedRowData, [field]: calculatedValue };
-                  await apiRequest(`/api/dynamic-table-data/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ rowData: updatedRowDataWithFormula })
-                  });
+                  const rowUpdateData = {
+                    row_data: JSON.stringify(updatedRowDataWithFormula),
+                    updated_at: new Date().toISOString()
+                  };
+                  await dbService.updateData('dynamic_table_data', id, rowUpdateData);
                   console.log(`✅ Row data güncellendi: ${field} = ${calculatedValue}`);
                   
                   // 3. Query'leri invalidate et
-                  queryClient.invalidateQueries({ queryKey: [`/api/cell-formulas/${tableId}`] });
-                  queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/data`] });
+                  queryClient.invalidateQueries({ queryKey: [`cell-formulas-${tableId}`] });
+                  queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
                   
                 } catch (error) {
                   console.error('❌ Formül kaydedilemedi veya row güncellenemedi:', error);
@@ -1015,7 +1185,35 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // Initialize Tabulator
   useEffect(() => {
-    if (!tabulatorRef.current || columnsLoading || dataLoading) return;
+    console.log(`🔍 Tabulator useEffect triggered:`, {
+      hasRef: !!tabulatorRef.current,
+      columnsLoading,
+      dataLoading,
+      actualTableUUID,
+      columnsLength: columns.length,
+      dataLength: tableData.length,
+      columnsError,
+      dataError
+    });
+    
+    // Daha esnek condition - sadece critical blocker'ları kontrol et
+    if (!tabulatorRef.current) {
+      console.log('⏸️ Tabulator initialization skipped - no ref');
+      return;
+    }
+    
+    if (columnsLoading || dataLoading) {
+      console.log('⏸️ Tabulator initialization skipped - still loading');
+      return;
+    }
+    
+    if (!actualTableUUID) {
+      console.log('⏸️ Tabulator initialization skipped - no table UUID');
+      return;
+    }
+
+    // Columns yoksa bile tabulator'ı başlat (boş tablo)
+    console.log('✅ Starting tabulator initialization...');
 
     const initTabulator = async () => {
       try {
@@ -1031,10 +1229,40 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
         }
 
         // Transform data for tabulator
-        const transformedData = (tableData as any[]).map((row: any) => ({
-          id: row.id,
-          ...row.rowData,
-        }));
+        const transformedData = (tableData as any[]).map((row: any) => {
+          console.log('🔍 Processing row:', row);
+          try {
+            // Supabase'den gelen row_data JSON string'ini parse et
+            const rowData = typeof row.row_data === 'string' 
+              ? JSON.parse(row.row_data) 
+              : (row.row_data || {});
+            
+            const result = {
+              id: row.id,
+              ...rowData,
+            };
+            console.log('✅ Transformed row:', result);
+            return result;
+          } catch (error) {
+            console.error('❌ Error parsing row data:', error);
+            return {
+              id: row.id,
+              _fallback: `Error: ${error}`,
+              ...row.rowData, // fallback to old format
+            };
+          }
+        });
+
+        // Eğer data yoksa dummy data ekle
+        if (transformedData.length === 0) {
+          console.log('⚠️ No data found, adding dummy rows');
+          transformedData.push(
+            { id: 'dummy-1', _fallback: 'Click to edit...', A: '', B: '', C: '' },
+            { id: 'dummy-2', _fallback: 'Add your data here...', A: '', B: '', C: '' }
+          );
+        }
+
+        console.log('📊 Final data for tabulator:', transformedData);
 
         const tabulatorColumns = getTabulatorColumns();
 
@@ -1071,6 +1299,10 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           headerFilterPlaceholder: "Filtrele...",
           selectable: true,
           responsiveLayout: "hide",
+          editTriggerEvent: "dblclick", // Double click to edit
+          tabEndNewRow: true, // Allow tab to create new row
+          cellEditing: true, // Force enable cell editing
+          editMode: "normal", // Normal editing mode
           cellContextMenu: [
             {
               label: "🔗 Data Link", 
@@ -1117,20 +1349,19 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
               action: function(e: any, cell: any) {
                 const rowId = cell.getRow().getData().id;
                 if (confirm("Bu satırı silmek istediğinizden emin misiniz?")) {
-                  // We'll add row deletion API call
-                  apiRequest(`/api/dynamic-table-data/${rowId}`, {
-                    method: 'DELETE'
-                  }).then(() => {
-                    queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/data`] });
+                  // Delete row using dbService
+                  dbService.deleteData('dynamic_table_data', rowId).then(() => {
+                    queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${tableId}`] });
                     toast({
                       title: "Başarılı",
-                      description: "Satır başarıyla silindi",
+                      description: "Satır başarıyla silindi"
                     });
-                  }).catch(() => {
+                  }).catch((error) => {
+                    console.error('Row deletion error:', error);
                     toast({
                       title: "Hata", 
                       description: "Satır silinirken hata oluştu",
-                      variant: "destructive",
+                      variant: "destructive"
                     });
                   });
                 }
@@ -1160,7 +1391,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
                 console.log('🔄 Tabulator redraw yapıldı');
                 
                 // React Query cache'ini de invalidate et
-                queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${tableId}/data`] });
+                queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
                 console.log('🔄 React Query cache invalidated');
                 
                 console.log(`🎯 Hücre güncellendi: ${rowId}-${columnName} = ${calculatedValue}`);
@@ -1205,7 +1436,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
         }
       }
     };
-  }, [columns, tableData, columnsLoading, dataLoading, tableId]);
+  }, [columns, tableData, columnsLoading, dataLoading, actualTableUUID]);
 
   const handleAddColumn = () => {
     createColumnMutation.mutate({
@@ -1438,7 +1669,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             setShowCellLinkModal(false);
             setCellLinkData(null);
           }}
-          sourceTableId={tableId}
+          sourceTableId={actualTableUUID || tableId}
           sourceRowId={cellLinkData.sourceRowId}
           sourceColumnName={cellLinkData.sourceColumnName}
         />

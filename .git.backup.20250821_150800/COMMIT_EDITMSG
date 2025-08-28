@@ -1,0 +1,8 @@
+Update table refresh logic for formula calculations
+
+Improve formula update process by invalidating cache and manually refreshing Tabulator, and fix mock data for A4 cell.
+
+Replit-Commit-Author: Agent
+Replit-Commit-Session-Id: 8bd311cb-6774-4abf-a86d-0b2fc7bc669b
+Replit-Commit-Checkpoint-Type: full_checkpoint
+Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/375ad0e8-d602-46b4-9c82-818245e1cd4d/8bd311cb-6774-4abf-a86d-0b2fc7bc669b/wu7GCxG

@@ -44,6 +44,19 @@ CREATE TABLE IF NOT EXISTS cell_links (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 4. Cell Formulas tablosu (Formül hesaplamaları için gerekli!)
+CREATE TABLE IF NOT EXISTS cell_formulas (
+    id SERIAL PRIMARY KEY,
+    table_id INTEGER REFERENCES dynamic_tables(id) ON DELETE CASCADE,
+    row_id INTEGER REFERENCES dynamic_table_data(id) ON DELETE CASCADE,
+    column_name VARCHAR(100) NOT NULL,
+    formula_text TEXT NOT NULL, -- "=A1+B1", "=SUM(A1:A10)" etc.
+    calculated_value TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(table_id, row_id, column_name)
+);
+
 -- 5. Sessions tablosu (Replit Auth için gerekli)
 CREATE TABLE IF NOT EXISTS sessions (
     sid VARCHAR PRIMARY KEY,
@@ -56,6 +69,8 @@ CREATE INDEX IF NOT EXISTS idx_dynamic_columns_table_id ON dynamic_columns(table
 CREATE INDEX IF NOT EXISTS idx_dynamic_table_data_table_id ON dynamic_table_data(table_id);
 CREATE INDEX IF NOT EXISTS idx_cell_links_source_table ON cell_links(source_table_id);
 CREATE INDEX IF NOT EXISTS idx_cell_links_target_table ON cell_links(target_table_name);
+CREATE INDEX IF NOT EXISTS idx_cell_formulas_table ON cell_formulas(table_id);
+CREATE INDEX IF NOT EXISTS idx_cell_formulas_row ON cell_formulas(row_id);
 CREATE INDEX IF NOT EXISTS idx_session_expire ON sessions(expire);
 
 -- İsteğe bağlı: Bazı temel tablolar eksikse onları da ekleyelim

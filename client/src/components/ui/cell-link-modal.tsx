@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
+import { Button } from "./button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
+import { Input } from "./input";
 import { Loader2, Link, ExternalLink, Calculator, Plus, Minus, X, Divide } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { FormulaParser } from "@/utils/formula-parser";
+import { useToast } from "../../hooks/use-toast";
+import { dbService } from "../../lib/database";
+import { FormulaParser } from "../../utils/formula-parser";
 import { HyperFormula } from "hyperformula";
 
 interface CellLinkModalProps {
@@ -53,22 +53,43 @@ export default function CellLinkModal({
     { code: "LYD", symbol: "ل.د", name: "Libya Dinarı" }
   ];
 
-  // Mevcut tabloları getir
+  // Mevcut tabloları getir - Supabase'den dynamic_tables
   const { data: availableTables = [], isLoading: tablesLoading } = useQuery({
-    queryKey: ["/api/available-tables"],
+    queryKey: ["dynamic_tables"],
+    queryFn: () => dbService.fetchTable('dynamic_tables', {
+      filter: 'is_active=eq.true'
+    }),
     enabled: isOpen,
   });
 
-  // Mevcut tablonun sütunlarını getir (formül için gerçek hücre koordinatları)
+  // Mevcut tablonun sütunlarını getir - Supabase'den dynamic_columns
   const { data: currentTableColumns = [] } = useQuery<any[]>({
-    queryKey: [`/api/dynamic-tables/${sourceTableId}/columns`],
+    queryKey: [`dynamic_columns-${sourceTableId}`],
+    queryFn: () => dbService.fetchTable('dynamic_columns', {
+      filter: `table_id=eq.${sourceTableId}`,
+      order: 'sort_order'
+    }),
     enabled: isOpen && modalMode === 'formula',
   });
 
-  // Mevcut tablonun verilerini getir (formül hesaplaması için)
+  // Mevcut tablonun verilerini getir - Supabase'den dynamic_table_data  
   const { data: currentTableData = [] } = useQuery<any[]>({
-    queryKey: [`/api/dynamic-tables/${sourceTableId}/data`],
+    queryKey: [`dynamic_table_data-${sourceTableId}`],
+    queryFn: () => dbService.fetchTable('dynamic_table_data', {
+      filter: `table_id=eq.${sourceTableId}`,
+      order: 'id'
+    }),
     enabled: isOpen && modalMode === 'formula',
+  });
+
+  // Seçilen tablonun sütunlarını getir - Supabase'den dynamic_columns
+  const { data: selectedTableColumns = [] } = useQuery<any[]>({
+    queryKey: [`selected-dynamic_columns-${selectedTable}`],
+    queryFn: () => dbService.fetchTable('dynamic_columns', {
+      filter: `table_id=eq.${selectedTable}`,
+      order: 'sort_order'
+    }),
+    enabled: isOpen && !!selectedTable,
   });
 
   // Gerçek hücre koordinatları oluştur
@@ -91,9 +112,13 @@ export default function CellLinkModal({
     return colIndex >= 0 ? String.fromCharCode(65 + colIndex) : sourceColumnName;
   }, [currentTableColumns, sourceColumnName]);
 
-  // Seçilen tablonun verilerini getir  
+  // Seçilen tablonun verilerini getir - Supabase'den  
   const { data: tableData = [], isLoading: dataLoading, error: dataError } = useQuery({
-    queryKey: [`/api/table-data/${selectedTable}`],
+    queryKey: [`selected-table-data-${selectedTable}`],
+    queryFn: () => dbService.fetchTable('dynamic_table_data', {
+      filter: `table_id=eq.${selectedTable}`,
+      order: 'id'
+    }),
     enabled: isOpen && !!selectedTable,
   });
 
@@ -102,7 +127,7 @@ export default function CellLinkModal({
     console.log(`🔍 selectedTable değişti:`, selectedTable);
     if (selectedTable) {
       console.log(`🔍 Tablo verisi yükleniyor: "${selectedTable}"`);
-      console.log('  - API endpoint:', `/api/table-data/${selectedTable}`);
+      console.log('  - Supabase query için UUID:', selectedTable);
       console.log('  - Yükleniyor:', dataLoading);
       console.log('  - Hata:', dataError);
       console.log('  - Veri:', tableData);
@@ -113,9 +138,9 @@ export default function CellLinkModal({
           console.log('  - İlk kayıt detayı:');
           console.log('    * id:', tableData[0]?.id);
           console.log('    * keys:', Object.keys(tableData[0] || {}));
-          console.log('    * rowData:', tableData[0]?.rowData);
-          if (tableData[0]?.rowData) {
-            console.log('    * rowData keys:', Object.keys(tableData[0].rowData));
+          console.log('    * rowData:', tableData[0]?.row_data);
+          if (tableData[0]?.row_data) {
+            console.log('    * rowData keys:', Object.keys(tableData[0].row_data));
           }
         }
       }
@@ -123,29 +148,40 @@ export default function CellLinkModal({
   }, [selectedTable, tableData, dataLoading, dataError]);
 
   // Seçilen tablonun kolonlarını bul
+  // Seçilen tablonun info'sunu oluştur
   const selectedTableInfo = React.useMemo(() => {
-    if (Array.isArray(availableTables) && selectedTable) {
-      return availableTables.find((table: any) => table.name === selectedTable);
-    }
-    return null;
-  }, [availableTables, selectedTable]);
+    if (!selectedTable || !selectedTableColumns.length) return null;
+    
+    return {
+      id: selectedTable,
+      name: selectedTable,
+      columns: selectedTableColumns.map((col: any) => col.name)
+    };
+  }, [selectedTable, selectedTableColumns]);
 
   // Debug: selectedTableInfo logla
   React.useEffect(() => {
     if (selectedTable) {
+      console.log('  - selectedTable (UUID):', selectedTable);
+      console.log('  - selectedTableColumns:', selectedTableColumns);
       console.log('  - selectedTableInfo:', selectedTableInfo);
       if (selectedTableInfo) {
         console.log('  - selectedTableInfo.columns:', selectedTableInfo.columns);
       }
     }
-  }, [selectedTable, selectedTableInfo]);
+  }, [selectedTable, selectedTableInfo, selectedTableColumns]);
 
-  // Cell link oluşturma mutation
+  // Cell link oluşturma mutation - Supabase
   const createLinkMutation = useMutation({
     mutationFn: async (linkData: any) => {
-      return apiRequest('/api/cell-links', {
-        method: 'POST',
-        body: JSON.stringify(linkData),
+      return await dbService.insertData('cell_links', {
+        source_table_id: linkData.sourceTableId,
+        source_row_id: linkData.sourceRowId,
+        source_column_name: linkData.sourceColumnName,
+        target_table_name: linkData.targetTableName,
+        target_row_id: linkData.targetRowId,
+        target_field_name: linkData.targetFieldName,
+        user_id: 'system'
       });
     },
     onSuccess: () => {
@@ -153,7 +189,7 @@ export default function CellLinkModal({
         title: "Başarılı",
         description: "Hücre bağlantısı oluşturuldu",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${sourceTableId}/data`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic_table_data-${sourceTableId}`] });
       onClose();
       resetSelections();
     },
@@ -196,8 +232,11 @@ export default function CellLinkModal({
 
   // Mevcut satır verisini getir
   const { data: currentRowData } = useQuery({
-    queryKey: [`/api/dynamic-table-data/${sourceRowId}`],
-    enabled: isOpen && modalMode === 'currency',
+    queryKey: [`current-row-data-${sourceRowId}`],
+    queryFn: () => dbService.fetchTable('dynamic_table_data', {
+      filter: `id=eq.${sourceRowId}`
+    }),
+    enabled: isOpen && modalMode === 'currency' && !!sourceRowId,
   });
 
   // Para birimi değiştirme mutation
@@ -224,14 +263,14 @@ export default function CellLinkModal({
       const newValue = `${amount}|${newCurrency}`;
       
       // Tüm mevcut satır verisini koru, sadece bu hücreyi güncelle
-      return apiRequest(`/api/dynamic-table-data/${sourceRowId}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          rowData: {
-            ...(currentRowData as any),
-            [sourceColumnName]: newValue
-          }
-        }),
+      const updatedRowData = {
+        ...(currentRowData as any),
+        [sourceColumnName]: newValue
+      };
+      
+      return await dbService.updateData('dynamic_table_data', sourceRowId, {
+        row_data: JSON.stringify(updatedRowData),
+        updated_at: new Date().toISOString()
       });
     },
     onSuccess: () => {
@@ -239,7 +278,7 @@ export default function CellLinkModal({
         title: "Başarılı",
         description: "Para birimi değiştirildi",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${sourceTableId}/data`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic_table_data-${sourceTableId}`] });
       onClose();
       resetSelections();
     },
@@ -252,19 +291,17 @@ export default function CellLinkModal({
     },
   });
 
-  // Satır silme mutation
+  // Satır silme mutation - Supabase
   const deleteRowMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest(`/api/dynamic-table-data/${sourceRowId}`, {
-        method: 'DELETE',
-      });
+      return await dbService.deleteData('dynamic_table_data', sourceRowId);
     },
     onSuccess: () => {
       toast({
         title: "Başarılı",
         description: "Satır başarıyla silindi",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${sourceTableId}/data`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic_table_data-${sourceTableId}`] });
       onClose();
       resetSelections();
     },
@@ -277,7 +314,7 @@ export default function CellLinkModal({
     },
   });
 
-  // Formül mutation'ı - Upsert logic ile duplicate hatası önlenir
+  // Formül mutation'ı - Supabase 
   const saveFormulaMutation = useMutation({
     mutationFn: async (formulaData: { formula: string }) => {
       // 1. Önce formülü hesapla
@@ -286,33 +323,28 @@ export default function CellLinkModal({
       
       console.log('🧮 Hesaplanan değer:', finalCalculatedValue);
 
-      // 2. Formülü calculatedValue ile beraber kaydet (backend upsert mantığı ile)
-      const formulaResponse = await apiRequest('/api/cell-formulas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tableId: sourceTableId,
-          rowId: sourceRowId,
-          columnName: sourceColumnName,
-          formula: formulaData.formula,
-          dependencies: null, // PostgreSQL jsonb için null kullan
-          calculatedValue: finalCalculatedValue // ÖNEMLİ: Hesaplanan değer burada kaydediliyor
-        }),
+      // 2. Formülü calculatedValue ile beraber kaydet
+      const formulaResponse = await dbService.insertData('dynamic_cell_formulas', {
+        table_id: sourceTableId,
+        row_id: sourceRowId,
+        column_name: sourceColumnName,
+        formula_text: formulaData.formula,
+        calculated_value: finalCalculatedValue,
+        is_active: true
       });
 
       console.log('✅ Formül database kaydedildi:', formulaResponse);
 
-      // 3. Hesaplanan değeri hücreye de yaz (JSON row_data formatında) 
-      const updateResponse = await apiRequest(`/api/dynamic-table-data/${sourceRowId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          [sourceColumnName]: finalCalculatedValue
-        }),
+      // 3. Hesaplanan değeri hücreye de yaz (JSON row_data formatında)
+      const currentRowData = currentTableData.find((row: any) => row.id === sourceRowId);
+      const updatedRowData = {
+        ...(typeof currentRowData?.row_data === 'string' ? JSON.parse(currentRowData.row_data) : currentRowData?.row_data || {}),
+        [sourceColumnName]: finalCalculatedValue
+      };
+      
+      const updateResponse = await dbService.updateData('dynamic_table_data', sourceRowId, {
+        row_data: JSON.stringify(updatedRowData),
+        updated_at: new Date().toISOString()
       });
 
       console.log('✅ Hücre değeri güncellendi:', updateResponse);
@@ -346,7 +378,7 @@ export default function CellLinkModal({
       });
       
       // Cache'i temizle ve tabloyu yenile
-      queryClient.invalidateQueries({ queryKey: [`/api/dynamic-tables/${sourceTableId}/data`] });
+      queryClient.invalidateQueries({ queryKey: [`dynamic_table_data-${sourceTableId}`] });
       
       // Modal'ı kapat
       onClose();
@@ -772,8 +804,8 @@ export default function CellLinkModal({
                   </SelectItem>
                 ) : (
                   (Array.isArray(availableTables) ? availableTables : [])?.map((table: any) => (
-                    <SelectItem key={table.name} value={table.name}>
-                      {table.displayName}
+                    <SelectItem key={table.id} value={table.id} className="text-foreground hover:bg-accent hover:text-accent-foreground">
+                      {table.display_name || table.displayName || table.name}
                     </SelectItem>
                   )) || []
                 )}
@@ -791,7 +823,7 @@ export default function CellLinkModal({
                 </SelectTrigger>
                 <SelectContent>
                   {selectedTableInfo.columns?.map((column: string) => (
-                    <SelectItem key={column} value={column}>
+                    <SelectItem key={column} value={column} className="text-foreground hover:bg-accent hover:text-accent-foreground">
                       {column}
                     </SelectItem>
                   )) || []}
@@ -876,7 +908,7 @@ export default function CellLinkModal({
                 </SelectTrigger>
                 <SelectContent>
                   {CURRENCIES.map((currency) => (
-                    <SelectItem key={currency.code} value={currency.code}>
+                    <SelectItem key={currency.code} value={currency.code} className="text-foreground hover:bg-accent hover:text-accent-foreground">
                       {currency.symbol} {currency.name} ({currency.code})
                     </SelectItem>
                   ))}
