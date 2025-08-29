@@ -288,20 +288,35 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       
       try {
         // dynamic_tables'da name ile ara
+        console.log(`🔍 Searching in dynamic_tables with filter: name=eq.${tableId}`);
         const tables = await dbService.fetchTable('dynamic_tables', {
           filter: `name=eq.${tableId}` // Doğru filter format
         });
+        
+        console.log(`📊 Found ${tables?.length || 0} tables with name "${tableId}"`);
+        if (tables && tables.length > 0) {
+          console.log(`📋 Table details:`, tables[0]);
+        }
         
         if (tables && tables.length > 0) {
           setActualTableUUID(tables[0].id);
           console.log(`✅ Found UUID: ${tables[0].id} for name: ${tableId}`);
         } else {
           console.warn(`⚠️ Table not found for name: ${tableId}`);
-          setActualTableUUID(null);
+          console.warn(`⚠️ Available tables check needed!`);
+          // Biraz bekle, belki yeni oluşturuldu
+          setTimeout(() => {
+            console.log(`🔄 Retrying UUID lookup for: ${tableId}`);
+            lookupTableUUID();
+          }, 1000);
         }
       } catch (error) {
         console.error(`❌ Error looking up table UUID:`, error);
-        setActualTableUUID(null);
+        // Network hatası olabilir, tekrar dene
+        setTimeout(() => {
+          console.log(`🔄 Retrying UUID lookup after error for: ${tableId}`);
+          lookupTableUUID();
+        }, 2000);
       }
     };
     
@@ -324,12 +339,45 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     queryKey: [`dynamic-columns-${actualTableUUID || tableId}`],
     queryFn: async () => {
       console.log(`🔍 Fetching columns for UUID: ${actualTableUUID}`);
+      console.log(`🔍 TableId received: "${tableId}"`);
+      console.log(`🔍 ActualTableUUID: "${actualTableUUID}"`);
+      
       const result = await dbService.fetchTable('dynamic_columns', {
         filter: `table_id=eq.${actualTableUUID}`,
         order: 'sort_order'
       });
+      
       console.log(`✅ Columns fetched:`, result);
-      return result;
+      console.log(`📊 Columns count: ${result?.length || 0}`);
+      
+      // 🔧 FIELD MAPPING: Supabase snake_case'i camelCase'e çevir
+      const mappedColumns = result?.map((col: any) => ({
+        id: col.id,
+        name: col.name,
+        displayName: col.display_name,  // snake_case -> camelCase
+        dataType: col.data_type,        // snake_case -> camelCase
+        isRequired: col.is_required,    // snake_case -> camelCase
+        isEditable: col.is_editable,    // snake_case -> camelCase
+        defaultValue: col.default_value,
+        options: col.options,
+        width: col.width || 150,
+        sortOrder: col.sort_order || 999
+      })) || [];
+      
+      if (mappedColumns && mappedColumns.length > 0) {
+        console.log(`📋 First column mapped details:`, {
+          name: mappedColumns[0].name,
+          displayName: mappedColumns[0].displayName,
+          dataType: mappedColumns[0].dataType,
+          isEditable: mappedColumns[0].isEditable,
+          tableId: actualTableUUID
+        });
+      } else {
+        console.warn(`⚠️ NO COLUMNS FOUND for UUID: ${actualTableUUID}`);
+        console.warn(`⚠️ This might be why headers are not showing!`);
+      }
+      
+      return mappedColumns;
     },
     enabled: !!actualTableUUID && actualTableUUID.length > 0,
     retry: 1,
@@ -788,10 +836,29 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
   // Convert columns to Tabulator format
   const getTabulatorColumns = () => {
     console.log('🔍 getTabulatorColumns called, columns:', columns);
+    console.log('📊 Columns array length:', columns?.length || 0);
+    
+    if (columns && columns.length > 0) {
+      console.log('📋 Column mapping details:');
+      columns.forEach((col: DynamicColumn, index: number) => {
+        console.log(`  Column ${index + 1}:`, {
+          name: col.name,
+          displayName: col.displayName,
+          dataType: col.dataType,
+          isEditable: col.isEditable,
+          width: col.width,
+          sortOrder: col.sortOrder
+        });
+      });
+    }
     
     // Eğer columns yoksa, minimal bir column ekle
     if (!columns || columns.length === 0) {
       console.log('⚠️ No columns found, creating default columns');
+      console.log('⚠️ This means either:');
+      console.log('  1. actualTableUUID is wrong');
+      console.log('  2. No columns exist in dynamic_columns table for this UUID');
+      console.log('  3. Query failed silently');
       return [
         {
           title: "ID",
@@ -1303,10 +1370,12 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           headerFilterPlaceholder: "Filtrele...",
           selectable: true,
           responsiveLayout: "hide",
-          editTriggerEvent: "dblclick", // Double click to edit
-          tabEndNewRow: true, // Allow tab to create new row
+          editTriggerEvent: "click", // Single click to edit - daha kolay
+          tabEndNewRow: false, // Tab new row'u disable et - sorun yaratabilir
           cellEditing: true, // Force enable cell editing
           editMode: "normal", // Normal editing mode
+          headerVisible: true, // Header'ları zorla görünür yap
+          columnHeaderVertAlign: "middle", // Header alignment
           cellContextMenu: [
             {
               label: "🔗 Data Link", 
@@ -1488,12 +1557,73 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     setShowColumnDialog(true);
   };
 
-  if (columnsLoading || dataLoading) {
+  // Eğer actualTableUUID null ise ve hala aranıyorsa, loading göster
+  // Eğer actualTableUUID null ise ve artık aranmıyorsa, error göster
+  if (actualTableUUID === null) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+            <i className="fas fa-exclamation-triangle text-red-600"></i>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Tablo Bulunamadı</h3>
+          <p className="text-gray-600 mb-4">"{tableId}" tablosu bulunamadı.</p>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-500">Kontrol edilecekler:</p>
+            <ul className="text-sm text-gray-500 list-disc list-inside">
+              <li>Tablo adının doğru olduğundan emin olun</li>
+              <li>Supabase bağlantısının çalıştığını kontrol edin</li>
+              <li>dynamic_tables tablosunda kayıt olduğunu doğrulayın</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Normal loading - sadece actualTableUUID varsa ama data/columns yükleniyorsa
+  if (actualTableUUID && (columnsLoading || dataLoading)) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Yükleniyor...</p>
+          <p className="text-gray-600">Tablo verisi yükleniyor...</p>
+          <p className="text-xs text-gray-400 mt-1">UUID: {actualTableUUID}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error handling - columns veya data yüklenirken hata oluşursa
+  if (columnsError || dataError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+            <i className="fas fa-database text-red-600"></i>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Veri Yükleme Hatası</h3>
+          <p className="text-gray-600 mb-4">Tablo verisi yüklenirken hata oluştu.</p>
+          <div className="space-y-2">
+            {columnsError && (
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <p className="text-sm font-medium text-red-800">Sütun Hatası:</p>
+                <p className="text-xs text-red-600">{String(columnsError)}</p>
+              </div>
+            )}
+            {dataError && (
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <p className="text-sm font-medium text-red-800">Veri Hatası:</p>
+                <p className="text-xs text-red-600">{String(dataError)}</p>
+              </div>
+            )}
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Sayfayı Yenile
+            </button>
+          </div>
         </div>
       </div>
     );
