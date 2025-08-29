@@ -66,7 +66,53 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
   const [actualTableUUID, setActualTableUUID] = useState<string | null>(null);
 
   // HyperFormula ile tablo içinde formül hesaplama - columns parametresi ile
-  const calculateFormulaInTable = (formula: string, data: any[], columnsData?: DynamicColumn[]): string | null => {
+  const calculateFormulaInTable = (formula: string, data: any[], columns?: DynamicColumn[]): string | null => {
+    console.log('🎯🎯🎯 FORMULA CALCULATION BAŞLADI 🎯🎯🎯');
+
+    // 🎯 ÇÖZÜM 1: Column Name → Position Mapping
+    const createColumnMapping = (columns: DynamicColumn[]) => {
+      // Map Excel-style letters (A,B,C,...) to positions based on sortOrder
+      const sortedColumns = [...columns].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      const mapping: { [key: string]: number } = {};
+
+      console.log('🔍 DEBUG - Original columns:', columns.map(c => `${c.name}(sortOrder:${c.sortOrder})`));
+      console.log('🔍 DEBUG - Sorted columns:', sortedColumns.map(c => `${c.name}(sortOrder:${c.sortOrder})`));
+
+      sortedColumns.forEach((column, index) => {
+        const letter = String.fromCharCode(65 + index); // A, B, C, ...
+        mapping[letter.toLowerCase()] = index;
+        // also add fallback by column name for formulas that reference column names directly
+        if (column.name) mapping[String(column.name).toLowerCase()] = index;
+      });
+
+      console.log('🔄 Column Letter/Name → Position Mapping:', mapping);
+      return mapping;
+    };
+
+    // 🎯 Formül çevirme fonksiyonu
+    const convertFormulaToPositionBased = (formula: string, columnMapping: { [key: string]: number }) => {
+      // Convert tokens like a1, qty1, A1 etc. into position-based Excel refs (A1, B1...)
+      const convertedFormula = formula.replace(/([a-zA-Z]+)(\d+)/g, (fullMatch, letters, digits) => {
+        const key = String(letters).toLowerCase();
+        const position = columnMapping[key];
+
+        if (position !== undefined) {
+          const excelColumn = String.fromCharCode(65 + position);
+          const excelRef = excelColumn + digits;
+          console.log(`🔄 ${fullMatch} → ${excelRef} (position: ${position})`);
+          return excelRef;
+        }
+
+        // fallback: if not found, leave original
+        return fullMatch;
+      });
+
+      return convertedFormula;
+    };
+    console.log('📋 Formula:', formula);
+    console.log('📊 Data length:', data.length);
+    console.log('📋 Columns:', columns?.length);
+    
     if (!formula.startsWith('=')) return null;
     
     // Boş formül kontrolü
@@ -95,9 +141,24 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       // Hücre referanslı formüller için HyperFormula kullan
       console.log('📋 Hücre referanslı formül, HyperFormula kullanılıyor...');
       
+      // 🎯 FORMÜL NORMALİZATİON UYGULA (Column Name → Position Mapping)
+      const originalFormula = formula;
+
+      // Column mapping oluştur ve formülü çevir
+      let normalizedFormula = formula;
+      if (columns && columns.length > 0) {
+        const columnMapping = createColumnMapping(columns);
+        normalizedFormula = convertFormulaToPositionBased(formula, columnMapping);
+      }
+
+      // Son olarak büyük harfe çevir (Excel standart)
+      normalizedFormula = normalizedFormula.toUpperCase();
+
+      console.log(`🎯 Formül çevirme sonucu: "${originalFormula}" → "${normalizedFormula}"`);
+
       const hfOptions = {
         licenseKey: 'gpl-v3',
-        useColumnIndex: false,
+        useColumnIndex: true, // 🎯 POZISYON BAZLI: A=0, B=1, C=2 otomatik
       };
       
       const hf = HyperFormula.buildEmpty(hfOptions);
@@ -107,7 +168,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       const numericSheetId = typeof sheetId === 'number' ? sheetId : 0;
       
       // Columns parametresini kullan
-      const activeColumns = columnsData || columns || [];
+      const activeColumns = columns || [];
       
       // Veri kontrolü - columns yoksa basit hesaplama yap
       if (!data.length || !activeColumns.length) {
@@ -119,21 +180,65 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       // Tablo verilerini HyperFormula formatına çevir - sadece gerçek veri
       const dataMatrix: (string | number | null)[][] = [];
       
+      console.log('🚀 MAPPING REVİZE - Tabulator → HyperFormula');
+      console.log('📊 Tabulator Sütun Sırası:');
+      activeColumns.forEach((col: DynamicColumn, idx: number) => {
+        console.log(`  [${idx}] → ${col?.name} (Excel: ${String.fromCharCode(65 + idx)})`);
+      });
+      
       // Sadece mevcut satırları işle
       for (let row = 0; row < data.length; row++) {
         const rowData: (string | number | null)[] = [];
         const tableRow = data[row];
         
-        for (let col = 0; col < activeColumns.length; col++) {
-          const column = activeColumns[col];
+        console.log(`🔍 Satır ${row + 1} işleniyor:`, tableRow);
+        console.log(`🔍 TableRow yapısı:`, Object.keys(tableRow));
+        console.log(`🔍 TableRow.id:`, tableRow.id);
+        console.log(`🔍 TableRow içeriği tam:`, JSON.stringify(tableRow, null, 2));
+        
+        // ÖNEMLİ: activeColumns'u POSITION'a göre sırala (Excel A=0, B=1, C=2...)
+        const sortedColumns = [...activeColumns].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        console.log(`📊 Position-based sıralama:`, sortedColumns.map(c => `${c.name}(order:${c.sortOrder})`).join(', '));
+        
+        for (let col = 0; col < sortedColumns.length; col++) {
+          const column = sortedColumns[col];
+          const columnName = column?.name || '';
           
-          // TABULATOR FRESH DATA formatını destekle
-          // Normal data: tableRow.rowData?.[column.name] 
-          // Fresh data: tableRow[column.name]
-          let value = tableRow.rowData?.[column?.name || ''];
-          if (value === undefined && tableRow[column?.name || '']) {
-            value = tableRow[column?.name || ''];
-            console.log(`🔧 Fresh data'dan alındı: ${column?.name} = ${value}`);
+          console.log(`🔧 ${columnName} aranıyor...`);
+          
+          // TABULATOR DATA ÇEŞİTLERİNİ TÜKETİM KONTROL ET
+          let value = undefined;
+          
+          // 1. Direkt field access (tableRow[columnName])
+          if (tableRow[columnName] !== undefined) {
+            value = tableRow[columnName];
+            console.log(`✅ Direkt field'dan alındı: ${columnName} = ${value}`);
+          }
+          // 2. rowData sub-object (tableRow.rowData?.[columnName])
+          else if (tableRow.rowData && tableRow.rowData[columnName] !== undefined) {
+            value = tableRow.rowData[columnName];
+            console.log(`✅ RowData'dan alındı: ${columnName} = ${value}`);
+          }
+          // 3. Parsed JSON rowData (string format)
+          else if (typeof tableRow.rowData === 'string') {
+            try {
+              const parsedRowData = JSON.parse(tableRow.rowData);
+              if (parsedRowData[columnName] !== undefined) {
+                value = parsedRowData[columnName];
+                console.log(`✅ Parsed JSON'dan alındı: ${columnName} = ${value}`);
+              }
+            } catch (e) {
+              console.log(`❌ JSON parse hatası:`, e);
+            }
+          }
+          
+          // 4. Hiçbir yerde bulunamadıysa null
+          if (value === undefined) {
+            console.log(`⚠️ ${columnName} hiçbir yerde bulunamadı`);
+            console.log(`⚠️ TableRow keys:`, Object.keys(tableRow));
+            console.log(`⚠️ TableRow.rowData type:`, typeof tableRow.rowData);
+            console.log(`⚠️ TableRow.rowData content:`, tableRow.rowData);
+            value = null;
           }
           
           // ÖNEMLİ: Eğer bu hücrede bir formül varsa, calculated değerini kullan
@@ -173,24 +278,9 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           
           rowData.push(finalValue);
           
-          // Debug log - sütun mapping
+          // Debug log - hücre mapping
           const cellRef = String.fromCharCode(65 + col) + (row + 1);
-          console.log(`🔍 ${cellRef} = ${finalValue} [${column?.name}] (raw: ${value}, type: ${typeof value})`);
-          
-          // A1+B1+C1 formülü için özel debug
-          if (formula === '=A1+B1+C1' && row === 0 && (col === 0 || col === 1 || col === 2)) {
-            console.log(`🔥 FORMÜL DEBUG [${cellRef}]:`, {
-              columnName: column?.name,
-              rawValue: value,
-              rawValueType: typeof value,
-              processedValue: finalValue,
-              processedValueType: typeof finalValue,
-              hasFormula: !!formulaInThisCell,
-              formulaCalculatedValue: formulaInThisCell?.calculatedValue,
-              willBeAddedAsNumber: Number(finalValue),
-              stringConcatenation: `"${finalValue}"`
-            });
-          }
+          console.log(`� ${cellRef} = ${finalValue} (raw: ${value}) [sütun: ${column?.name}]`);
         }
         dataMatrix.push(rowData);
       }
@@ -210,12 +300,33 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       // SheetId numerik olarak kullan
       hf.setSheetContent(numericSheetId, dataMatrix);
       
-      // Formülü hesapla - boş alanda
+      // 🧪 DEBUG TEST: HyperFormula indexleme kontrolü
+      console.log('🧪 HYPERFORMULA İNDEXLEME TEST:');
+      console.log('- A1 hücresi direkt test:', hf.getCellValue({ sheet: numericSheetId, row: 0, col: 0 }));
+      console.log('- B1 hücresi direkt test:', hf.getCellValue({ sheet: numericSheetId, row: 0, col: 1 }));
+      console.log('- C1 hücresi direkt test:', hf.getCellValue({ sheet: numericSheetId, row: 0, col: 2 }));
+      
+      // Matrix debug - tamamını yazdır
+      console.log('🔍 HyperFormula Matrix (full):', JSON.stringify(dataMatrix.slice(0, 3), null, 2));
+      console.log('🔍 Matrix boyutları:', dataMatrix.length, 'x', dataMatrix[0]?.length);
+      
+      // Formülü hesapla - boş alanda - 🎯 TRANSLATED FORMULA KULLAN
       const tempRow = Math.max(data.length + 2, 10);
       const tempCol = Math.max(activeColumns.length + 2, 10);
-      hf.setCellContents({ sheet: numericSheetId, row: tempRow, col: tempCol }, [[formula]]);
+      
+      console.log(`🎯 HyperFormula'ya gönderilecek formül: "${normalizedFormula}" (orijinal: "${originalFormula}")`);
+      hf.setCellContents({ sheet: numericSheetId, row: tempRow, col: tempCol }, [[normalizedFormula]]);
       
       const result = hf.getCellValue({ sheet: numericSheetId, row: tempRow, col: tempCol });
+      
+      // 🎯 POZISYON BAZLI MAPPING DOĞRULAMA
+      console.log('🧪 POZISYON BAZLI MAPPING DOĞRULAMA:');
+      console.log(`- Orijinal Formül: ${originalFormula}`);
+      console.log(`- Normalized Formül: ${normalizedFormula}`);
+      console.log('- A1 (Matrix[0][0]) pozisyonu:', dataMatrix[0]?.[0]);
+      console.log('- B1 (Matrix[0][1]) pozisyonu:', dataMatrix[0]?.[1]);
+      console.log('- C1 (Matrix[0][2]) pozisyonu:', dataMatrix[0]?.[2]);
+      console.log('- HyperFormula Sonucu:', result);
       
       // A1+B1+C1 özel debug
       if (formula === '=A1+B1+C1') {
@@ -418,28 +529,48 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       
       for (const link of cellLinks) {
         try {
-          // Target table name kontrolü
-          if (!link.targetTableName || link.targetTableName === 'undefined') {
-            console.warn('⚠️ Skipping link with undefined target table name:', link);
+          // Accept different link field naming (camelCase or snake_case) and UUIDs
+          const targetTableRaw = link.targetTableName ?? link.target_table_name ?? link.target_table_id;
+          if (!targetTableRaw || targetTableRaw === 'undefined') {
+            console.warn('⚠️ Skipping link with undefined target table name/id:', link);
             continue;
           }
-          
-          // Target table'ın UUID'sini bul
-          const targetTables = await dbService.fetchTable('dynamic_tables', {
-            filter: `name=eq.${link.targetTableName}`
-          });
-          
-          if (targetTables.length > 0) {
-            const targetTableData = await dbService.fetchTable('dynamic_table_data', {
-              filter: `table_id=eq.${targetTables[0].id}`
+
+          // If targetTableRaw looks like a UUID, use it as table_id directly
+          const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+          let targetTableId: string | undefined;
+          if (uuidRegex.test(String(targetTableRaw))) {
+            targetTableId = String(targetTableRaw);
+          } else {
+            // Otherwise assume it's a name and look up
+            const targetTables = await dbService.fetchTable('dynamic_tables', {
+              filter: `name=eq.${targetTableRaw}`
             });
-            
-            const targetRow = targetTableData.find((row: any) => row.id === link.targetRowId);
-            
-            if (targetRow && targetRow.row_data?.[link.targetFieldName]) {
-              const linkKey = `${link.sourceRowId}_${link.sourceColumnName}`;
-              values[linkKey] = targetRow.row_data[link.targetFieldName];
-            }
+            if (targetTables.length > 0) targetTableId = targetTables[0].id;
+          }
+
+          if (!targetTableId) {
+            console.warn('⚠️ Could not resolve target table id for link:', link);
+            continue;
+          }
+
+          const targetTableData = await dbService.fetchTable('dynamic_table_data', {
+            filter: `table_id=eq.${targetTableId}`
+          });
+
+          const targetRow = targetTableData.find((row: any) => row.id === (link.targetRowId ?? link.target_row_id));
+          if (!targetRow) continue;
+
+          // row_data may be a JSON string; normalize it to an object
+          let parsedRowData: any = targetRow.row_data;
+          if (typeof parsedRowData === 'string') {
+            try { parsedRowData = JSON.parse(parsedRowData); } catch (e) { /* leave as-is */ }
+          }
+
+          const targetField = link.targetFieldName ?? link.target_field_name ?? link.target_field;
+          if (targetField && parsedRowData && Object.prototype.hasOwnProperty.call(parsedRowData, targetField)) {
+            const linkKey = `${link.sourceRowId}_${link.sourceColumnName}`;
+            values[linkKey] = parsedRowData[targetField];
           }
         } catch (error) {
           console.error('Error fetching linked value:', error);
@@ -463,6 +594,9 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // 🧮 AUTO-RECALCULATION: Tüm formülleri yeniden hesaplama fonksiyonu
   const recalculateAllFormulas = async () => {
+    console.log('🔥🔥🔥 RECALCULATE ALL FORMULAS BAŞLADI 🔥🔥🔥');
+    console.log('📋 CellFormulas length:', cellFormulas?.length);
+    
     if (!cellFormulas || cellFormulas.length === 0) {
       console.log('📋 Hesaplanacak formül yok');
       return;
@@ -478,7 +612,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
         const newValue = calculateFormulaInTable(
           formula.formula,
           tableData || [],
-          columns
+          columns // columnsData yerine columns
         );
         
         console.log(`🧮 Formül sonucu: "${formula.formula}" = ${newValue} (eski: ${formula.calculatedValue})`);
@@ -537,6 +671,12 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
     // Değişen field bağımlılığında olan formülleri filtrele
     const dependentFormulas = cellFormulas.filter((formula: any) => {
+      // Formül kontrolü - formula.formula undefined olabilir
+      if (!formula || !formula.formula) {
+        console.log('⚠️ Formül veya formula text eksik:', formula);
+        return false;
+      }
+      
       const formulaText = formula.formula.toLowerCase();
       
       // 1. Önce formül bu tablodaki satırlardan biri mi kontrol et
@@ -587,7 +727,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
         const newCalculatedValue = calculateFormulaInTable(
           formula.formula,
           freshTableData,
-          columns
+          columns // columnsData yerine columns
         );
         
         console.log(`🧮 Yeniden hesaplanan değer: "${formula.formula}" = ${newCalculatedValue} (eski: ${formula.calculatedValue})`);
@@ -615,8 +755,30 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
                 row_data: JSON.stringify(updatedRowData),
                 updated_at: new Date().toISOString()
               };
-              await dbService.updateData('dynamic_table_data', formula.rowId, rowUpdateData);
-              console.log(`✅ Row data güncellendi: ${formula.rowId} ${formula.columnName} = ${newCalculatedValue}`);
+              // If formula.rowId is a dummy id, create real row first
+              let targetRowId = formula.rowId;
+              if (String(targetRowId).startsWith('dummy-')) {
+                console.log(`🎯 recalc: formula.rowId is dummy (${targetRowId}), creating real row...`);
+                try {
+                  const newRowData = { ...currentRowData };
+                  delete newRowData.id;
+                  delete newRowData._fallback;
+                  const created = await createRowMutation.mutateAsync(newRowData);
+                  const createdId = created?.id ?? (Array.isArray(created) ? created[0]?.id : undefined);
+                  if (!createdId) {
+                    console.error('❌ recalc: createRowMutation returned no id:', created);
+                  } else {
+                    targetRowId = createdId;
+                    console.log(`✅ recalc: Created real row ${targetRowId} for formula update`);
+                    try { tabulatorInstance.current?.getRow(targetRowId)?.update({ id: targetRowId }); } catch (e) {}
+                  }
+                } catch (err) {
+                  console.error('❌ recalc: Failed to create real row for formula update:', err);
+                }
+              }
+
+              await dbService.updateData('dynamic_table_data', targetRowId, rowUpdateData);
+              console.log(`✅ Row data güncellendi: ${targetRowId} ${formula.columnName} = ${newCalculatedValue}`);
             }
 
             // 3. Tabulator'daki hücreyi güncelle
@@ -766,20 +928,24 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
       let actualTableId: string;
       
       try {
-        if (isNaN(parseInt(tableId))) {
-          // tableId string (table name) 
+        // If tableId already looks like a UUID, use it directly. Otherwise treat it as a name and look up.
+        const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+        if (uuidRegex.test(String(tableId))) {
+          actualTableId = tableId as string;
+          console.log(`ℹ️ Using provided table UUID for row: ${actualTableId}`);
+        } else {
+          // tableId is a name (even if numeric string like "123") — look up by name
           const tables = await dbService.fetchTable('dynamic_tables', {
             filter: `name=eq.${tableId}`
           });
-          
+
           if (tables && tables.length > 0) {
             actualTableId = tables[0].id; // UUID string
             console.log(`✅ Found table UUID for row: ${actualTableId}`);
           } else {
             actualTableId = "d4ddfe9d-a0dd-4318-88a9-bba1f9ad3a45"; // Fallback UUID
+            console.warn(`⚠️ Table lookup failed for name="${tableId}", using fallback UUID: ${actualTableId}`);
           }
-        } else {
-          actualTableId = "d4ddfe9d-a0dd-4318-88a9-bba1f9ad3a45"; // Fallback UUID
         }
       } catch (error) {
         console.error('Error looking up table UUID for row:', error);
@@ -814,6 +980,10 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
   // Update row mutation
   const updateRowMutation = useMutation({
     mutationFn: async ({ id, rowData }: { id: string; rowData: any }) => {
+      if (!id) {
+        console.error('updateRowMutation called with invalid id:', id, rowData);
+        throw new Error('Invalid id for updateRowMutation');
+      }
       // Convert to Supabase format for dynamic_table_data
       const supabaseData = {
         row_data: JSON.stringify(rowData), // Store as JSONB
@@ -881,9 +1051,13 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
     const tabulatorColumns = columns
       .sort((a: DynamicColumn, b: DynamicColumn) => a.sortOrder - b.sortOrder)
-      .map((col: DynamicColumn) => {
+      .map((col: DynamicColumn, columnIndex: number) => {
+        // Excel-style column reference (A, B, C, ...)
+        const excelRef = String.fromCharCode(65 + columnIndex);
+        const displayTitle = `${col.displayName} (${excelRef})`;
+        
         const column: any = {
-          title: col.displayName,
+          title: displayTitle,  // "Deneme (A)", "Test (B)", etc.
           field: col.name,
           width: col.width || 150,
           resizable: true,
@@ -948,97 +1122,6 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
                 </button>
               </div>
             `;
-          },
-          cellEdited: function(cell: any) {
-            console.log(`🔥🔥🔥 CELL EDITED EVENT TRIGGERED! 🔥🔥🔥`);
-            const row = cell.getRow().getData();
-            const field = cell.getField();
-            const value = cell.getValue();
-            console.log(`🎯 Row ID: ${row.id}, Field: ${field}, Value: "${value}"`);
-            
-            // Get all current row data (excluding id) and update the specific field
-            const { id, ...currentRowData } = row;
-            let updatedRowData = { ...currentRowData, [field]: value };
-            
-            // Formül kontrolü - eğer = ile başlıyorsa HyperFormula ile hesapla
-            if (typeof value === 'string' && value.startsWith('=')) {
-              const calculatedValue = calculateFormulaInTable(value, 
-                tabulatorInstance.current ? tabulatorInstance.current.getData() : (tableData || []), 
-                columns.length > 0 ? columns : []
-              );
-              console.log(`🧮 Formül hesaplandı: "${value}" = ${calculatedValue}`);
-              
-              // Formülü kaydet
-              const formulaData = {
-                tableId: tableId,
-                rowId: id,
-                columnName: field,
-                formula: value,
-                calculatedValue: calculatedValue,
-                dependencies: null // PostgreSQL jsonb için null kulan
-              };
-              
-              // Hesaplanan değeri hücreye anında set et
-              cell.setValue(calculatedValue || '0');
-              
-              // 🔥 KRITIK: Formülü database'e kaydet VE table row'unu da güncelle
-              const saveFormulaAndUpdateRow = async () => {
-                try {
-                  // 1. Önce formülü kaydet (cell_formulas tablosuna)
-                  const formulaSupabaseData = {
-                    table_id: actualTableUUID, // UUID kullan
-                    row_id: id, // UUID kullan (string)
-                    column_name: field,
-                    formula_text: value,
-                    calculated_value: calculatedValue?.toString() || ''
-                  };
-                  console.log('📤 Saving formula:', formulaSupabaseData);
-                  await dbService.insertData('cell_formulas', formulaSupabaseData);
-                  console.log(`✅ Formül kaydedildi: ${value} = ${calculatedValue}`);
-                  
-                  // 2. SONRA table row'unu da hesaplanan değer ile güncelle
-                  const updatedRowDataWithFormula = { ...updatedRowData, [field]: calculatedValue };
-                  const rowUpdateData = {
-                    row_data: JSON.stringify(updatedRowDataWithFormula),
-                    updated_at: new Date().toISOString()
-                  };
-                  await dbService.updateData('dynamic_table_data', id, rowUpdateData);
-                  console.log(`✅ Row data güncellendi: ${field} = ${calculatedValue}`);
-                  
-                  // 3. Query'leri invalidate et
-                  queryClient.invalidateQueries({ queryKey: [`cell-formulas-${tableId}`] });
-                  queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
-                  
-                } catch (error) {
-                  console.error('❌ Formül kaydedilemedi veya row güncellenemedi:', error);
-                }
-              };
-              
-              // Async işlemi başlat
-              saveFormulaAndUpdateRow();
-              
-              // Hesaplanan değeri göster (UI için)
-              updatedRowData[field] = calculatedValue || value;
-              
-              // Normal row update'i yapma (çünkü yukarıda async olarak yapıyoruz)
-              return;
-            }
-            
-            // Normal hücre değeri - database'e kaydet
-            updateRowMutation.mutate({
-              id: id,
-              rowData: updatedRowData
-            });
-
-            // 🔄 SMART RECALCULATION: Sadece bağımlı formülleri hesapla
-            setTimeout(() => {
-              console.log(`🚀 SMART RECALCULATION tetikleniyor: ${field} değişti`);
-              recalculateDependentFormulas(field, value);
-            }, 200); // Biraz daha uzun bekle ki database güncellensin
-
-            if (onCellEdit) {
-              onCellEdit(id, field, value);
-            }
           },
           headerMenu: [
             {
@@ -1335,6 +1418,85 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
         console.log('📊 Final data for tabulator:', transformedData);
 
+        // Shared processor for cell edits to ensure dummy rows are converted to real rows
+        const processCellEdit = async (row: any, field: string, value: any, cell?: any) => {
+          let actualRowId = row.id;
+
+          // If dummy, create real row first
+          if (row.id && String(row.id).startsWith('dummy-')) {
+            console.log(`🎯 processCellEdit: Dummy row detected (${row.id}), creating real row...`);
+            try {
+              const newRowData = { ...row };
+              delete newRowData.id;
+              delete newRowData._fallback;
+              const result = await createRowMutation.mutateAsync(newRowData);
+              const resultId = result?.id ?? (Array.isArray(result) ? result[0]?.id : undefined);
+              if (!resultId) {
+                console.error('❌ processCellEdit: createRowMutation returned no id:', result);
+                toast({ title: 'Hata', description: 'Satır oluşturulamadı (id alınamadı)', variant: 'destructive' });
+                return; // abort to avoid update with undefined id
+              }
+              actualRowId = resultId;
+              console.log(`✅ processCellEdit: Real row created: ${actualRowId}`);
+              // Update Tabulator row id if we have the instance and cell
+              try { cell?.getRow()?.update({ id: actualRowId }); } catch (e) { /* ignore */ }
+            } catch (error) {
+              console.error('❌ processCellEdit: Failed creating real row:', error);
+              toast({ title: 'Hata', description: 'Satır oluşturulurken hata oluştu', variant: 'destructive' });
+              return; // abort
+            }
+          }
+
+          // Normalize current row data (exclude id)
+          const { id, ...currentRowData } = row;
+
+          // If formula
+          if (typeof value === 'string' && value.startsWith('=')) {
+            try {
+              const calculatedValue = calculateFormulaInTable(value, tabulatorInstance.current ? tabulatorInstance.current.getData() : (tableData || []), columns || []);
+              // Update cell UI immediately
+              try { cell?.setValue(calculatedValue ?? '0'); } catch (e) { /* ignore */ }
+
+              // Save formula to DB
+              const formulaSupabaseData = {
+                table_id: actualTableUUID,
+                row_id: actualRowId,
+                column_name: field,
+                formula_text: value,
+                calculated_value: calculatedValue?.toString() || ''
+              };
+              console.log('📤 processCellEdit: Saving formula:', formulaSupabaseData);
+              await dbService.insertData('dynamic_cell_formulas', formulaSupabaseData);
+              console.log('✅ processCellEdit: Formula saved');
+
+              // Update row data with calculated value
+              const updatedRowDataWithFormula = { ...currentRowData, [field]: calculatedValue };
+              const rowUpdateData = { row_data: JSON.stringify(updatedRowDataWithFormula), updated_at: new Date().toISOString() };
+              await updateRowMutation.mutateAsync({ id: actualRowId, rowData: updatedRowDataWithFormula });
+              console.log(`✅ processCellEdit: Row updated: ${actualRowId}`);
+
+              queryClient.invalidateQueries({ queryKey: [`cell-formulas-${tableId}`] });
+              queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
+
+              // Recalculate dependent formulas
+              recalculateDependentFormulas(field, calculatedValue);
+            } catch (error) {
+              console.error('❌ processCellEdit: Error processing formula cell edit:', error);
+            }
+            return;
+          }
+
+          // Normal non-formula update
+          try {
+            const updatedRowData = { ...currentRowData, [field]: value };
+            await updateRowMutation.mutateAsync({ id: actualRowId, rowData: updatedRowData });
+            console.log(`✅ processCellEdit: Normal row update done for ${actualRowId}`);
+            recalculateDependentFormulas(field, value);
+          } catch (error) {
+            console.error('❌ processCellEdit: Error updating row:', error);
+          }
+        };
+
         const tabulatorColumns = getTabulatorColumns();
 
         // Create new instance
@@ -1376,6 +1538,16 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           editMode: "normal", // Normal editing mode
           headerVisible: true, // Header'ları zorla görünür yap
           columnHeaderVertAlign: "middle", // Header alignment
+          // 🔥 KRITIK: cellEdited event handler'ını burada register et
+            cellEdited: function(cell: any) {
+              const row = cell.getRow().getData();
+              const field = cell.getField();
+              const value = cell.getValue();
+              console.log(`🔥 CELL EDITED: Row ID: ${row.id}, Field: ${field}, Value: "${value}"`);
+
+              // Use shared processor to avoid duplicate logic
+              void processCellEdit(row, field, value, cell);
+            },
           cellContextMenu: [
             {
               label: "🔗 Data Link", 
@@ -1442,6 +1614,24 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             }
           ],
         });
+
+        // 🔥 KRITIK DEBUG: Tabulator instance oluşturulduktan sonra event test et
+        console.log('🧪 TABULATOR INSTANCE DEBUG:');
+        console.log('  - Instance var mı?', !!tabulatorInstance.current);
+        console.log('  - Element var mı?', !!tabulatorRef.current);
+        
+        // Manual event listener ekle - ekstra güvenlik için
+          if (tabulatorInstance.current) {
+          console.log('🔧 Manual cellEdited listener ekleniyor...');
+          tabulatorInstance.current.on("cellEdited", function(cell: any) {
+            const row = cell.getRow().getData();
+            const field = cell.getField();
+            const value = cell.getValue();
+            console.log(`🔥 MANUAL CELL EDITED: Row ID: ${row.id}, Field: ${field}, Value: "${value}"`);
+            void processCellEdit(row, field, value, cell);
+          });
+          console.log('✅ Manual cellEdited listener eklendi');
+        }
 
         // Global fonksiyon - Modal'dan sonra hücre güncellemesi için
         (window as any).updateCellAfterFormula = (rowId: string, columnName: string, calculatedValue: string) => {

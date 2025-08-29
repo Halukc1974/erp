@@ -114,8 +114,16 @@ class DatabaseService {
         throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
 
-      const result = await response.json();
-      console.log(`✅ Insert successful:`, result);
+      let result = await response.json();
+      console.log(`✅ Insert successful (raw):`, result);
+
+      // Normalize Supabase response: when using return=representation,
+      // Supabase may return an array of inserted rows; normalize to a single object
+      if (Array.isArray(result) && result.length > 0) {
+        console.log('🔧 Normalizing insert result: returning first element of array');
+        result = result[0];
+      }
+
       return result;
     } catch (error) {
       console.error(`Error inserting into ${tableName}:`, error);
@@ -126,6 +134,10 @@ class DatabaseService {
   // Update data in a table
   async updateData(tableName: string, id: any, data: any) {
     try {
+      if (!id) {
+        console.error(`Attempted updateData with invalid id: ${id} for table ${tableName}`);
+        throw new Error(`Invalid id for updateData: ${id}`);
+      }
       const response = await fetch(`${this.apiUrl}/${tableName}?id=eq.${id}`, {
         method: 'PATCH',
         headers: this.headers,

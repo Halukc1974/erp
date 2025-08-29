@@ -267,7 +267,22 @@ export default function CellLinkModal({
         [sourceColumnName]: newValue
       };
       
-      return await dbService.updateData('dynamic_table_data', sourceRowId, {
+      // If sourceRowId is a dummy, create a real row first
+      let targetRowId = sourceRowId;
+      if (String(targetRowId).startsWith('dummy-')) {
+        console.log(`🔧 changeCurrencyMutation: sourceRowId is dummy (${targetRowId}), creating real row...`);
+        const created = await dbService.insertData('dynamic_table_data', {
+          table_id: sourceTableId,
+          row_data: JSON.stringify(updatedRowData),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+        // insertData returns an array or object depending on API; normalize
+        targetRowId = Array.isArray(created) ? created[0]?.id : created?.id;
+        console.log('🔧 changeCurrencyMutation: created row id =', targetRowId);
+      }
+
+      return await dbService.updateData('dynamic_table_data', targetRowId, {
         row_data: JSON.stringify(updatedRowData),
         updated_at: new Date().toISOString()
       });
@@ -323,9 +338,23 @@ export default function CellLinkModal({
       console.log('🧮 Hesaplanan değer:', finalCalculatedValue);
 
       // 2. Formülü calculatedValue ile beraber kaydet
+      // If sourceRowId is a dummy, create a real row first with initial data
+      let targetRowId = sourceRowId;
+      if (String(targetRowId).startsWith('dummy-')) {
+        console.log(`🔧 saveFormulaMutation: sourceRowId is dummy (${targetRowId}), creating real row...`);
+        const created = await dbService.insertData('dynamic_table_data', {
+          table_id: sourceTableId,
+          row_data: JSON.stringify({ [sourceColumnName]: finalCalculatedValue }),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+        targetRowId = Array.isArray(created) ? created[0]?.id : created?.id;
+        console.log('🔧 saveFormulaMutation: created row id =', targetRowId);
+      }
+
       const formulaResponse = await dbService.insertData('dynamic_cell_formulas', {
         table_id: sourceTableId,
-        row_id: sourceRowId,
+        row_id: targetRowId,
         column_name: sourceColumnName,
         formula_text: formulaData.formula,
         calculated_value: finalCalculatedValue,
@@ -341,7 +370,7 @@ export default function CellLinkModal({
         [sourceColumnName]: finalCalculatedValue
       };
       
-      const updateResponse = await dbService.updateData('dynamic_table_data', sourceRowId, {
+      const updateResponse = await dbService.updateData('dynamic_table_data', targetRowId, {
         row_data: JSON.stringify(updatedRowData),
         updated_at: new Date().toISOString()
       });
@@ -403,21 +432,76 @@ export default function CellLinkModal({
   useEffect(() => {
     (window as any).calculateFormulaWithData = (formula: string, tableData: any[], columns: any[]): string => {
       if (!formula.startsWith('=') || !tableData.length || !columns.length) return '0';
-      
+
+      // 🎯 ÇÖZÜM 1: Column Name → Position Mapping
+      const createColumnMapping = (columns: any[]) => {
+        const sortedColumns = [...columns].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        const mapping: { [key: string]: number } = {};
+
+        sortedColumns.forEach((column, index) => {
+          const letter = String.fromCharCode(65 + index);
+          mapping[letter.toLowerCase()] = index;
+          if (column.name) mapping[String(column.name).toLowerCase()] = index;
+        });
+
+        console.log('🔄 GLOBAL - Column Name → Position Mapping:', mapping);
+        return mapping;
+      };
+
+      // 🎯 Formül çevirme fonksiyonu
+      const convertFormulaToPositionBased = (formula: string, columnMapping: { [key: string]: number }) => {
+        // Excel hücre referanslarını bul ve çevir (örn: a1 → A1, b2 → B2)
+        const convertedFormula = formula.replace(/([a-zA-Z]+\d+)/g, (match) => {
+          const columnName = match.toLowerCase();
+          const position = columnMapping[columnName];
+
+          if (position !== undefined) {
+            // Pozisyonu Excel sütun harfine çevir (0=A, 1=B, 2=C, ...)
+            const excelColumn = String.fromCharCode(65 + position);
+            const rowMatch = match.match(/(\d+)/);
+            const rowNumber = rowMatch ? rowMatch[1] : '1';
+
+            const excelRef = excelColumn + rowNumber;
+            console.log(`🔄 GLOBAL - ${match} → ${excelRef} (position: ${position})`);
+            return excelRef;
+          }
+
+          return match; // Mapping bulunamazsa orijinali bırak
+        });
+
+        return convertedFormula;
+      };
+
       try {
         console.log('🧮 Global formül hesaplanıyor:', formula);
-        
+
+        // Column mapping oluştur ve formülü çevir
+        let processedFormula = formula;
+        if (columns && columns.length > 0) {
+          const columnMapping = createColumnMapping(columns);
+          processedFormula = convertFormulaToPositionBased(formula, columnMapping);
+        }
+
+        // Son olarak büyük harfe çevir (Excel standart)
+        processedFormula = processedFormula.toUpperCase();
+
+        console.log(`🎯 GLOBAL - Formül çevirme sonucu: "${formula}" → "${processedFormula}"`);
+
         // HyperFormula instance oluştur
         const hf = HyperFormula.buildEmpty({ licenseKey: 'gpl-v3' });
         const sheetId = hf.addSheet('Sheet1');
         const numericSheetId = typeof sheetId === 'number' ? sheetId : 0;
         
-        // Veri matrisini oluştur
+        // Veri matrisini oluştur - ÖNEMLİ: POSITION-BASED SIRALAMA
         const dataMatrix: (string | number | null)[][] = [];
+        
+        // Columns'u sortOrder'a göre sırala (Excel A=0, B=1, C=2...)
+        const sortedColumns = [...columns].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        console.log(`📊 Modal Position-based sıralama:`, sortedColumns.map((c: any) => `${c.name}(order:${c.sortOrder})`).join(', '));
         
         tableData.forEach((row: any) => {
           const rowData: (string | number | null)[] = [];
-          columns.forEach((column: any) => {
+          sortedColumns.forEach((column: any) => {
             // TABULATOR DATA FORMAT: row[column.name] (id hariç direkt property'ler)
             const value = row[column.name];
             
@@ -444,7 +528,7 @@ export default function CellLinkModal({
         
         // Padding
         while (dataMatrix.length < 10) {
-          dataMatrix.push(new Array(Math.max(columns.length, 10)).fill(null));
+          dataMatrix.push(new Array(Math.max(sortedColumns.length, 10)).fill(null));
         }
         dataMatrix.forEach(row => {
           while (row.length < 10) row.push(null);
@@ -453,8 +537,8 @@ export default function CellLinkModal({
         // Veriyi set et ve formülü hesapla
         hf.setSheetContent(numericSheetId, dataMatrix);
         const tempRow = Math.max(tableData.length + 2, 10);
-        const tempCol = Math.max(columns.length + 2, 10);
-        hf.setCellContents({ sheet: numericSheetId, row: tempRow, col: tempCol }, [[formula]]);
+        const tempCol = Math.max(sortedColumns.length + 2, 10);
+        hf.setCellContents({ sheet: numericSheetId, row: tempRow, col: tempCol }, [[processedFormula]]);
         
         const result = hf.getCellValue({ sheet: numericSheetId, row: tempRow, col: tempCol });
         hf.destroy();
@@ -517,12 +601,49 @@ export default function CellLinkModal({
   // HyperFormula ile profesyonel formül hesaplama
   const calculateFormulaPreview = (formula: string): string | null => {
     if (!formula.startsWith('=')) return null;
-    
+
     // Boş formül kontrolü
     if (formula.trim() === '=') {
       return 'Hesaplanıyor...';
     }
-    
+
+    // 🎯 ÇÖZÜM 1: Column Name → Position Mapping
+    const createColumnMapping = (columns: any[]) => {
+      const sortedColumns = [...columns].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      const mapping: { [key: string]: number } = {};
+
+      console.log('🔍 MODAL DEBUG - Original columns:', columns.map((c: any) => `${c.name}(sortOrder:${c.sortOrder})`));
+      console.log('🔍 MODAL DEBUG - Sorted columns:', sortedColumns.map((c: any) => `${c.name}(sortOrder:${c.sortOrder})`));
+
+      sortedColumns.forEach((column, index) => {
+        const letter = String.fromCharCode(65 + index);
+        mapping[letter.toLowerCase()] = index;
+        if (column.name) mapping[String(column.name).toLowerCase()] = index;
+      });
+
+      console.log('🔄 MODAL - Column Name → Position Mapping:', mapping);
+      return mapping;
+    };
+
+    // 🎯 Formül çevirme fonksiyonu
+    const convertFormulaToPositionBased = (formula: string, columnMapping: { [key: string]: number }) => {
+      const convertedFormula = formula.replace(/([a-zA-Z]+)(\d+)/g, (fullMatch, letters, digits) => {
+        const key = String(letters).toLowerCase();
+        const position = columnMapping[key];
+
+        if (position !== undefined) {
+          const excelColumn = String.fromCharCode(65 + position);
+          const excelRef = excelColumn + digits;
+          console.log(`🔄 MODAL - ${fullMatch} → ${excelRef} (position: ${position})`);
+          return excelRef;
+        }
+
+        return fullMatch;
+      });
+
+      return convertedFormula;
+    };
+
     try {
       console.log('🧮 Formül hesaplanıyor:', formula);
       console.log('📊 Tablo verileri:', currentTableData.length, 'satır');
@@ -534,18 +655,84 @@ export default function CellLinkModal({
         console.log('⚠️ Veri veya sütun bulunamadı');
         return '0';
       }
+
+      // *** MODAL İÇİN ÖZEL DATA TRANSFORMATION ***
+      // Tabulator'daki transform logic'i modal için de uygula
+      const transformedData = currentTableData.map((originalRow, index) => {
+        console.log(`🔄 MODAL - Transform Row ${index + 1}:`, originalRow);
+        
+        let transformedRow: any = {
+          id: originalRow.id,
+          table_id: originalRow.table_id,
+          user_id: originalRow.user_id,
+          created_at: originalRow.created_at,
+          updated_at: originalRow.updated_at
+        };
+
+        // row_data parsing - tabulator ile aynı logic
+        let parsedData: any = {};
+        
+        if (typeof originalRow.row_data === 'string') {
+          try {
+            parsedData = JSON.parse(originalRow.row_data);
+            console.log(`✅ MODAL - JSON parse success:`, parsedData);
+          } catch (e) {
+            console.error(`❌ MODAL - JSON parse error:`, e);
+            parsedData = {};
+          }
+        } else if (typeof originalRow.row_data === 'object' && originalRow.row_data !== null) {
+          parsedData = originalRow.row_data;
+          console.log(`✅ MODAL - Direct object use:`, parsedData);
+        } else {
+          console.log(`⚠️ MODAL - No row_data found, using empty object`);
+          parsedData = {};
+        }
+
+        // Field'ları direkt row seviyesine çıkar - tabulator pattern (POSITION-BASED)
+        const sortedTableColumns = [...currentTableColumns].sort((a: any, b: any) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        sortedTableColumns.forEach((column: any) => {
+          const fieldName = column.name;
+          if (parsedData[fieldName] !== undefined) {
+            transformedRow[fieldName] = parsedData[fieldName];
+            console.log(`🔗 MODAL - Field ${fieldName}: ${parsedData[fieldName]} → ${transformedRow[fieldName]}`);
+          } else {
+            transformedRow[fieldName] = '';
+            console.log(`⚠️ MODAL - Field ${fieldName} not found, using empty string`);
+          }
+        });
+
+        console.log(`✅ MODAL - Transformed row:`, transformedRow);
+        return transformedRow;
+      });
+
+      console.log('🎯 MODAL - All data transformed:', transformedData);
       
+      // 🎯 FORMÜL NORMALİZATİON UYGULA (Column Name → Position Mapping)
+      const originalFormula = formula;
+
+      // Column mapping oluştur ve formülü çevir
+      let normalizedFormula = formula;
+      if (currentTableColumns && currentTableColumns.length > 0) {
+        const columnMapping = createColumnMapping(currentTableColumns);
+        normalizedFormula = convertFormulaToPositionBased(formula, columnMapping);
+      }
+
+      // Son olarak büyük harfe çevir (Excel standart)
+      normalizedFormula = normalizedFormula.toUpperCase();
+
+      console.log(`🎯 MODAL - Formül çevirme sonucu: "${originalFormula}" → "${normalizedFormula}"`);
+
       // HyperFormula instance oluştur
       const hfOptions = {
         licenseKey: 'gpl-v3', // Open source license
-        useColumnIndex: false, // A, B, C sütun isimleri kullan
+        useColumnIndex: true, // 🎯 POZISYON BAZLI: A=0, B=1, C=2 otomatik
       };
       
       const hf = HyperFormula.buildEmpty(hfOptions);
       
       // Worksheet ekle - HyperFormula 0-indexed sayısal ID döndürür
       const sheetId = hf.addSheet('Sheet1');
-      console.log('📑 Sheet ID:', sheetId, 'Type:', typeof sheetId);
+      console.log('📑 MODAL - Sheet ID:', sheetId, 'Type:', typeof sheetId);
       
       // SheetId'yi sayıya çevir
       const numericSheetId = typeof sheetId === 'number' ? sheetId : 0;
@@ -558,13 +745,29 @@ export default function CellLinkModal({
       const dataMatrix: (string | number | null)[][] = [];
       
       // Sadece mevcut satırları işle, boş satır ekleme
-      for (let row = 0; row < currentTableData.length; row++) {
+      for (let row = 0; row < transformedData.length; row++) {
         const rowData: (string | number | null)[] = [];
-        const tableRow = currentTableData[row];
+        const tableRow = transformedData[row];  // TRANSFORMED DATA KULLAN
+        
+        console.log(`🔍 MODAL - Satır ${row + 1} işleniyor:`, tableRow);
+        console.log(`🔍 MODAL - TableRow yapısı:`, Object.keys(tableRow));
         
         for (let col = 0; col < currentTableColumns.length; col++) {
           const column = currentTableColumns[col];
-          const value = tableRow.rowData?.[column.name];
+          const columnName = column.name;
+          
+          console.log(`🔧 MODAL - ${columnName} aranıyor...`);
+          
+          // ARTIK BASIT: Direkt field access (tableRow[columnName])
+          let value = tableRow[columnName];
+          
+          if (value !== undefined) {
+            console.log(`✅ MODAL - Direkt field'dan alındı: ${columnName} = ${value}`);
+          } else {
+            console.log(`⚠️ MODAL - ${columnName} hiçbir yerde bulunamadı`);
+            console.log(`⚠️ MODAL - TableRow keys:`, Object.keys(tableRow));
+            value = null;
+          }
           
           // Sayısal değerleri number olarak kaydet
           let finalValue: string | number | null = null;
@@ -593,15 +796,13 @@ export default function CellLinkModal({
           const cellRef = String.fromCharCode(65 + col) + (row + 1);
           console.log(`📍 ${cellRef} = ${finalValue} (raw: ${value}) [sütun: ${column.name}]`);
           
-          // a1+b1+c1 formülü için özel debug
-          if (formula.toLowerCase().includes('a1+b1+c1') && row === 0) {
+          // a1+a2 formülü için özel debug
+          if (formula.toLowerCase().includes('a1') && row === 0 && col === 0) {
             console.log(`🔥 MODAL FORMÜL DEBUG [${cellRef}]:`, {
               columnName: column.name,
               rawValue: value,
               processedValue: finalValue,
-              expectedForA1: col === 0 ? 'Bu A1 olmalı' : 'Bu A1 değil',
-              expectedForB1: col === 1 ? 'Bu B1 olmalı' : 'Bu B1 değil', 
-              expectedForC1: col === 2 ? 'Bu C1 olmalı' : 'Bu C1 değil'
+              expectedForA1: 'Bu A1 değeri, tab verification için'
             });
           }
         }
@@ -627,19 +828,22 @@ export default function CellLinkModal({
       hf.setSheetContent(numericSheetId, dataMatrix);
       
       // Formülü geçici bir hücreye yerleştir ve hesapla - boş alanda
-      const tempRow = Math.max(currentTableData.length + 2, 10);
+      const tempRow = Math.max(transformedData.length + 2, 10);
       const tempCol = Math.max(currentTableColumns.length + 2, 10);
       
-      console.log(`📝 Formül ${tempRow+1}:${tempCol+1} hücresine yerleştiriliyor`);
+      console.log(`📝 MODAL - Formül ${tempRow+1}:${tempCol+1} hücresine yerleştiriliyor`);
+      console.log(`🎯 MODAL - HyperFormula'ya gönderilecek formül: "${normalizedFormula}" (orijinal: "${originalFormula}")`);
       
-      // Formülü array olarak gönder
-      const formulaArray = [[formula]];
+      // Formülü array olarak gönder - NORMALIZED FORMULA KULLAN
+      const formulaArray = [[normalizedFormula]];
       hf.setCellContents({ sheet: numericSheetId, row: tempRow, col: tempCol }, formulaArray);
       
       // Sonucu al
       const result = hf.getCellValue({ sheet: numericSheetId, row: tempRow, col: tempCol });
+      
       console.log('✅ MODAL FORMÜL SONUCU:', {
-        formula: formula,
+        originalFormula: originalFormula,
+        normalizedFormula: normalizedFormula,
         result: result,
         resultType: typeof result,
         expectedFormula: 'A1+B1+C1 değerleri toplamı olmalı',
