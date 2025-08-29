@@ -395,8 +395,9 @@ export function Sidebar() {
           </div>
         ) : (
           menuItems.map((section, sectionIndex) => {
-            // Find original section data for context menu
+            // Find original section and page data for context menu
             const originalSection = sections.find(s => s.title === section.title);
+            const originalPage = pages.find(p => p.title === section.title && p.href === section.href);
             
             return (
               <div key={sectionIndex} className="px-4 mb-6">
@@ -410,6 +411,7 @@ export function Sidebar() {
                           ? "text-blue-600 bg-blue-50"
                           : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
                       )}
+                      onContextMenu={(e) => handleContextMenu(e, 'page', originalPage)}
                     >
                       {section.icon && <section.icon className="w-5 h-5" />}
                       <span>{section.title}</span>
