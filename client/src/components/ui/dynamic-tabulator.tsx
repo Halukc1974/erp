@@ -244,7 +244,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
           // ÖNEMLİ: Eğer bu hücrede bir formül varsa, calculated değerini kullan
           const currentRowId = tableRow.id;
           const currentColumnName = column?.name || '';
-          const formulaInThisCell = (cellFormulas || []).find((f: any) => 
+          const formulaInThisCell = (normalizedCellFormulas || []).find((f: any) => 
             f.rowId === currentRowId && f.columnName === currentColumnName
           );
           
@@ -592,19 +592,31 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     enabled: !!actualTableUUID,
   });
 
+  // Normalize cellFormulas to expected camelCase shape used elsewhere
+  const normalizedCellFormulas = Array.isArray(cellFormulas) ? (cellFormulas as any[]).map((f: any) => ({
+    id: f.id,
+    rowId: f.row_id ?? f.rowId,
+    columnName: f.column_name ?? f.columnName,
+    formula: f.formula_text ?? f.formula ?? f.formulaText,
+    calculatedValue: f.calculated_value ?? f.calculatedValue ?? f.calculatedValueText ?? null,
+    tableId: f.table_id ?? f.tableId,
+    createdAt: f.created_at ?? f.createdAt,
+    updatedAt: f.updated_at ?? f.updatedAt
+  })) : [];
+
   // 🧮 AUTO-RECALCULATION: Tüm formülleri yeniden hesaplama fonksiyonu
   const recalculateAllFormulas = async () => {
     console.log('🔥🔥🔥 RECALCULATE ALL FORMULAS BAŞLADI 🔥🔥🔥');
-    console.log('📋 CellFormulas length:', cellFormulas?.length);
-    
-    if (!cellFormulas || cellFormulas.length === 0) {
+    console.log('📋 CellFormulas length:', normalizedCellFormulas?.length);
+
+    if (!normalizedCellFormulas || normalizedCellFormulas.length === 0) {
       console.log('📋 Hesaplanacak formül yok');
       return;
     }
 
-    console.log(`🔄 ${cellFormulas.length} formül yeniden hesaplanıyor...`);
+    console.log(`🔄 ${normalizedCellFormulas.length} formül yeniden hesaplanıyor...`);
 
-    for (const formula of cellFormulas) {
+    for (const formula of normalizedCellFormulas) {
       try {
         console.log(`🧪 İşlenen formül:`, formula);
         
@@ -648,7 +660,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
 
   // 🎯 SMART RECALCULATION: Sadece bağımlı formülleri hesapla
   const recalculateDependentFormulas = async (changedField: string, newValue: any) => {
-    if (!cellFormulas || cellFormulas.length === 0) {
+    if (!normalizedCellFormulas || normalizedCellFormulas.length === 0) {
       console.log('📋 Hesaplanacak formül yok');
       return;
     }
@@ -670,7 +682,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     console.log(`📋 Olası hücre referansları: ${possibleCellRefs.join(', ')}`);
 
     // Değişen field bağımlılığında olan formülleri filtrele
-    const dependentFormulas = cellFormulas.filter((formula: any) => {
+  const dependentFormulas = (normalizedCellFormulas || []).filter((formula: any) => {
       // Formül kontrolü - formula.formula undefined olabilir
       if (!formula || !formula.formula) {
         console.log('⚠️ Formül veya formula text eksik:', formula);
@@ -786,12 +798,8 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
               (window as any).updateCellAfterFormula(formula.rowId, formula.columnName, String(newCalculatedValue));
             }
 
-            // 4. ÖNEMLİ: cellFormulas listesini de güncelle (sonraki hesaplamalar için)
-            const formulaIndex = cellFormulas.findIndex((f: any) => f.id === formula.id);
-            if (formulaIndex >= 0) {
-              cellFormulas[formulaIndex].calculatedValue = String(newCalculatedValue);
-              console.log('🔄 cellFormulas listesi güncellendi');
-            }
+            // NOTE: Do not mutate the fetched array directly; invalidate queries to refresh
+            console.log('🔄 Marked formula updated; queries will be invalidated for fresh read');
             
           } catch (error) {
             console.error('❌ Database güncelleme hatası:', error);
@@ -1068,7 +1076,7 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             const columnName = col.name;
             
             // Check if this cell has a formula
-            const cellFormula = (cellFormulas || []).find((formula: any) => 
+            const cellFormula = (normalizedCellFormulas || []).find((formula: any) => 
               formula.rowId === rowId && formula.columnName === columnName
             );
             
