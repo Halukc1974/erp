@@ -519,18 +519,29 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
     enabled: !!actualTableUUID,
   });
 
+  // Normalize cell links to consistent camelCase shape
+  const normalizedCellLinks = Array.isArray(cellLinks) ? (cellLinks as any[]).map((l: any) => ({
+    id: l.id,
+    sourceRowId: l.sourceRowId ?? l.source_row_id ?? l.source_row,
+    sourceColumnName: l.sourceColumnName ?? l.source_column_name ?? l.source_column,
+    targetTableName: l.targetTableName ?? l.target_table_name ?? l.target_table_id ?? l.target_table,
+    targetRowId: l.targetRowId ?? l.target_row_id ?? l.target_row,
+    targetFieldName: l.targetFieldName ?? l.target_field_name ?? l.target_field,
+    isActive: l.isActive ?? l.is_active ?? true,
+  })) : [];
+
   // Fetch linked values for all cell links
   const { data: linkedValues = {} } = useQuery({
     queryKey: [`linked-values-${actualTableUUID || tableId}`],
     queryFn: async () => {
-      if (cellLinks.length === 0) return {};
-      
+      if (normalizedCellLinks.length === 0) return {};
+
       const values: { [key: string]: any } = {};
-      
-      for (const link of cellLinks) {
+
+      console.log('🔗 normalizedCellLinks for linked-values:', normalizedCellLinks);
+      for (const link of normalizedCellLinks) {
         try {
-          // Accept different link field naming (camelCase or snake_case) and UUIDs
-          const targetTableRaw = link.targetTableName ?? link.target_table_name ?? link.target_table_id;
+          const targetTableRaw = link.targetTableName;
           if (!targetTableRaw || targetTableRaw === 'undefined') {
             console.warn('⚠️ Skipping link with undefined target table name/id:', link);
             continue;
@@ -558,8 +569,16 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             filter: `table_id=eq.${targetTableId}`
           });
 
-          const targetRow = targetTableData.find((row: any) => row.id === (link.targetRowId ?? link.target_row_id));
-          if (!targetRow) continue;
+          // Normalize potential field name variants (camelCase or snake_case)
+          const targetRowId = link.targetRowId;
+          const sourceRowId = link.sourceRowId;
+          const sourceColumnName = link.sourceColumnName;
+
+          const targetRow = targetTableData.find((row: any) => row.id === targetRowId);
+          if (!targetRow) {
+            console.warn('⚠️ Linked value target row not found for link:', link);
+            continue;
+          }
 
           // row_data may be a JSON string; normalize it to an object
           let parsedRowData: any = targetRow.row_data;
@@ -567,20 +586,48 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             try { parsedRowData = JSON.parse(parsedRowData); } catch (e) { /* leave as-is */ }
           }
 
-          const targetField = link.targetFieldName ?? link.target_field_name ?? link.target_field;
+          const targetField = link.targetFieldName;
           if (targetField && parsedRowData && Object.prototype.hasOwnProperty.call(parsedRowData, targetField)) {
-            const linkKey = `${link.sourceRowId}_${link.sourceColumnName}`;
+            const linkKey = `${String(sourceRowId)}_${String(sourceColumnName)}`;
+            console.log('🔑 linked-value key ->', linkKey, 'value ->', parsedRowData[targetField]);
             values[linkKey] = parsedRowData[targetField];
           }
         } catch (error) {
           console.error('Error fetching linked value:', error);
         }
       }
-      
+
       return values;
     },
-    enabled: cellLinks.length > 0,
+    enabled: normalizedCellLinks.length > 0,
   });
+
+  // When linkedValues arrive, apply them to Tabulator rows so cells show linked data
+  useEffect(() => {
+    try {
+      if (!linkedValues || Object.keys(linkedValues).length === 0) return;
+      console.log('🔄 Applying linkedValues to Tabulator:', linkedValues);
+      if (tabulatorInstance.current) {
+        Object.entries(linkedValues).forEach(([key, value]) => {
+          const parts = String(key).split('_');
+          if (parts.length < 2) return;
+          const rowId = parts[0];
+          const columnName = parts.slice(1).join('_');
+          try {
+            const row = tabulatorInstance.current.getRow(rowId);
+            if (row) {
+              row.update({ [columnName]: value });
+            }
+          } catch (e) {
+            console.warn('🔧 Could not update row for linked value:', key, e);
+          }
+        });
+        try { tabulatorInstance.current.redraw(); } catch (e) { /* ignore */ }
+      }
+    } catch (e) {
+      console.error('Error applying linkedValues to tabulator:', e);
+    }
+  }, [linkedValues]);
 
   // Fetch cell formulas for this table - Supabase'den dynamic_cell_formulas
   const { data: cellFormulas = [] } = useQuery<any[]>({
@@ -1080,9 +1127,9 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
               formula.rowId === rowId && formula.columnName === columnName
             );
             
-            // Check if this cell has a link
-            const cellLink = cellLinks.find((link: any) => 
-              link.sourceRowId === rowId && link.sourceColumnName === columnName
+            // Check if this cell has a link (use normalizedCellLinks)
+            const cellLink = (normalizedCellLinks || []).find((link: any) => 
+              String(link.sourceRowId) === String(rowId) && String(link.sourceColumnName) === String(columnName)
             );
             
             let displayValue = '';
@@ -1094,8 +1141,10 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
               cellIcon = '🧮'; // Formula icon
             } else if (cellLink) {
               // This cell has a linked value - show actual linked data
-              const linkKey = `${rowId}_${columnName}`;
-              const linkedValue = linkedValues[linkKey];
+              const linkKey = `${String(rowId)}_${String(columnName)}`;
+              console.log('🔍 Formatter found cellLink, linkKey:', linkKey);
+              console.log('🔍 linkedValues snapshot:', linkedValues);
+              const linkedValue = linkedValues[linkKey] ?? linkedValues[`${String(rowId)}_${String(columnName)}`];
               if (linkedValue) {
                 displayValue = `${linkedValue}`;
                 cellIcon = '🔗'; // Link icon
@@ -1486,6 +1535,27 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
               queryClient.invalidateQueries({ queryKey: [`cell-formulas-${tableId}`] });
               queryClient.invalidateQueries({ queryKey: [`dynamic-table-data-${actualTableUUID || tableId}`] });
 
+              // Optimistically apply linked-value updates (if this table is a target for any links)
+              try {
+                if (normalizedCellLinks && normalizedCellLinks.length > 0 && tabulatorInstance.current) {
+                  normalizedCellLinks.forEach((link: any) => {
+                    // If this link points to this table and this row/field, update the source cell
+                    if ((link.targetTableName === actualTableUUID || link.targetTableName === tableId) &&
+                        String(link.targetRowId) === String(actualRowId) &&
+                        String(link.targetFieldName) === String(field)) {
+                      const linkKey = `${String(link.sourceRowId)}_${String(link.sourceColumnName)}`;
+                      try {
+                        const sourceRow = tabulatorInstance.current.getRow(link.sourceRowId);
+                        if (sourceRow) sourceRow.update({ [link.sourceColumnName]: calculatedValue });
+                      } catch (e) { /* ignore */ }
+                    }
+                  });
+                }
+              } catch (e) { console.error('Error applying optimistic linked updates:', e); }
+
+              // Invalidate linked-values queries so other components refresh
+              queryClient.invalidateQueries({ predicate: (q: any) => String(q.queryKey?.[0] ?? '').startsWith('linked-values-') });
+
               // Recalculate dependent formulas
               recalculateDependentFormulas(field, calculatedValue);
             } catch (error) {
@@ -1499,6 +1569,13 @@ export default function DynamicTabulator({ tableId, onCellEdit }: DynamicTabulat
             const updatedRowData = { ...currentRowData, [field]: value };
             await updateRowMutation.mutateAsync({ id: actualRowId, rowData: updatedRowData });
             console.log(`✅ processCellEdit: Normal row update done for ${actualRowId}`);
+
+            // Supabase güncellemesi tamamlandıktan sonra linked-values sorgusunu refetch et
+            await queryClient.refetchQueries({ predicate: (q: any) => String(q.queryKey?.[0] ?? '').startsWith('linked-values-') });
+
+            // Tabulator'u redraw et (en güncel linked value gelsin)
+            try { tabulatorInstance.current?.redraw(); } catch (e) { /* ignore */ }
+
             recalculateDependentFormulas(field, value);
           } catch (error) {
             console.error('❌ processCellEdit: Error updating row:', error);
